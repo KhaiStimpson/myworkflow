@@ -1,0 +1,31 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "flow",
+  "version": "0.1.0",
+  "description": "Khai's working loop as a plugin — route the task, explore or design before code, write a phased plan with the loop prompt that executes it, work one slice at a time, look at the running app on desktop and mobile, then hand off.",
+  "author": {
+    "name": "Khai",
+    "email": "khai@stimpson.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "planning",
+    "loop",
+    "design-review",
+    "engineering"
+  ],
+  "skills": [
+    "./skills/start",
+    "./skills/explore",
+    "./skills/design",
+    "./skills/plan",
+    "./skills/work",
+    "./skills/eyes",
+    "./skills/wrap"
+  ],
+  "agents": [
+    "./agents/researcher.md",
+    "./agents/fresh-eyes.md"
+  ]
+}

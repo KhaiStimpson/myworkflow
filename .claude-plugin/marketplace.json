@@ -1,0 +1,22 @@
+{
+  "name": "myworkflow",
+  "owner": {
+    "name": "Khai",
+    "email": "khai@stimpson.dev"
+  },
+  "description": "Khai's personal working loop, packaged as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "flow",
+      "source": "./",
+      "description": "Route the task, explore or design before code, plan in phases with a matching loop prompt, work one slice at a time, review on the running app, hand off.",
+      "category": "engineering",
+      "keywords": [
+        "workflow",
+        "planning",
+        "loop",
+        "design-review"
+      ]
+    }
+  ]
+}
