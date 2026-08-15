@@ -1,7 +1,6 @@
 ---
 name: work
 description: Implement exactly one slice — one task or one ticket — on its own branch, verify it, capture screenshots if it touches UI, and land it on the integration branch. Use as the body of a loop iteration, or for a single self-contained change.
-disable-model-invocation: true
 ---
 
 One slice. One branch. One reviewable diff. The discipline here is not thoroughness — it is

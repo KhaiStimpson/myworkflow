@@ -1,7 +1,6 @@
 ---
 name: explore
 description: Brainstorm an open-ended idea without touching a single file, and land it as an artifact of concrete options with a recommendation. Use when the request is "brainstorm", "come up with N suggestions", "be creative", "what could we do here" — anything where the answer is ideas, not code.
-disable-model-invocation: true
 ---
 
 The request is for **ideas**, and the correct number of files changed is zero. Say so once at the

@@ -1,7 +1,6 @@
 ---
 name: eyes
 description: Run the app, look at it at desktop and mobile widths, and capture durable screenshots — the review pass that green tests do not perform. Use before committing any UI-touching change, and before asking for approval on visual work.
-disable-model-invocation: true
 ---
 
 Every front-end defect in the mined corpus was found by a human looking at the running app,

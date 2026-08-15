@@ -1,7 +1,6 @@
 ---
 name: wrap
 description: Close out a session or an effort — write the handoff file, open the integration PR, comment the tracker, and make the repo present itself. Use when stopping mid-effort, when a loop finishes, or when the work is done.
-disable-model-invocation: true
 ---
 
 Two different endings. Read which one you are at before writing anything.

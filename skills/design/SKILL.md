@@ -1,7 +1,6 @@
 ---
 name: design
 description: Answer an under-determined visual question with three variants in one self-contained HTML artifact, at desktop and mobile, then record the decision so implementation reuses the real design system. Use before writing UI code whenever more than one defensible visual answer exists.
-disable-model-invocation: true
 ---
 
 More than one defensible visual answer exists, so the cheapest place to be wrong is a mockup.

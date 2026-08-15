@@ -23,13 +23,18 @@ most one question about size and one about design. Everything else you decide an
 Apply the tests in this order, because a higher answer dominates the ones below it.
 
 1. **Is anything material still undecided?** → **Route 3 — Foggy.**
-   Hand to `/mattpocock-skills:wayfinder`. Resolve decisions until nothing is left to decide,
-   then re-enter at route 2.
+   Invoke the `mattpocock-skills:wayfinder` skill. Resolve decisions until nothing is left to
+   decide, then re-enter at route 2.
 2. **Does it exceed one reviewable change (~400 lines)?** → **Route 2 — Planned.**
-   Hand to `/flow:plan`.
+   Invoke the `plan` skill.
 3. **Does it need a fresh context window of focused work?** → **Route 1 — Slice.**
-   Hand to `/flow:work`.
+   Invoke the `work` skill.
 4. Otherwise → **Route 0 — Direct.** Do it here. Write no orchestration files at all.
+
+**Invoke means invoke — call the named skill yourself with the Skill tool and carry on inside
+this conversation.** Do not tell the user to type a slash command; `/flow:design`, `/flow:plan`
+and the rest are not shell commands and typing them outside Claude Code will only produce a
+"command not found" error. The only thing the user types is `/flow:start` itself.
 
 Uncertainty biases **up**, never down. Route 0 protects itself through the veto, not through
 optimism.
@@ -38,7 +43,8 @@ optimism.
 
 Independent of size. It fires when **more than one defensible visual answer exists** — not merely
 because a UI file will change. Fixing a wrong colour is not a design question; deciding what the
-page should feel like is. When it fires, `/flow:design` runs **first**, whatever the route.
+page should feel like is. When it fires, invoke the `design` skill **first**, whatever the route,
+before invoking whichever route's skill follows.
 
 Historically this is the most common shape of your work and the easiest one to mis-route: a UI
 request that lands in route 1 produces code where three mockups were wanted.

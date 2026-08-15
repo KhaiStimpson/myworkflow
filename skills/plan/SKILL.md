@@ -1,7 +1,6 @@
 ---
 name: plan
 description: Turn agreed work into a phased markdown plan with checkboxes in docs/, plus the exact loop prompt that executes it — and implement none of it. Use when work exceeds one reviewable change, or when asked for "a plan with phases", "a loop command", or "a goal prompt".
-disable-model-invocation: true
 ---
 
 The plan file is the **state** of the effort; the loop prompt is the **stateless engine** that
