@@ -9,10 +9,17 @@ Your working loop, packaged as a Claude Code plugin — derived from ~40 of your
 ## Install
 
 ```bash
-claude plugin marketplace add C:/Dev/repos/myworkflow
+claude plugin marketplace add KhaiStimpson/myworkflow
 ```
 
 ```bash
+claude plugin install flow@myworkflow
+```
+
+Or, working from a local clone:
+
+```bash
+claude plugin marketplace add /path/to/myworkflow
 claude plugin install flow@myworkflow
 ```
 
@@ -44,11 +51,10 @@ door.
 
 ## Design notes
 
-**The routes match Orchestrator's four lanes on purpose.**
-[`worker/.scratch/orchestrator/spec.md`](../worker/.scratch/orchestrator/spec.md) specifies the
-automated version — conductors, spawned sessions, context packs, status files. This is the
-hand-driven version of the same model: usable today, and a behavioural spec for what Orchestrator
-has to reproduce.
+**The routes match Orchestrator's four lanes on purpose.** Orchestrator (a separate, private repo)
+specifies the automated version of this same model — conductors, spawned sessions, context packs,
+status files. This is the hand-driven version: usable today, and a behavioural spec for what
+Orchestrator has to reproduce.
 
 **It encodes what you do, not what a methodology says.** The plan-plus-loop-prompt pairing, the
 integration-branch topology, three variants at both breakpoints, "stop and ask rather than guess",
