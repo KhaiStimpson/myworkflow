@@ -1,6 +1,7 @@
 ---
 name: eyes
 description: Run the app, look at it at desktop and mobile widths, and capture durable screenshots — the review pass that green tests do not perform. Use before committing any UI-touching change, and before asking for approval on visual work.
+allowed-tools: Read, Glob, Grep, Bash(npx playwright *), Bash(*chrome-headless-shell*), Bash(mkdir *), Bash(npm run *), Bash(pnpm *), Bash(dotnet run *)
 ---
 
 Every front-end defect in the mined corpus was found by a human looking at the running app,

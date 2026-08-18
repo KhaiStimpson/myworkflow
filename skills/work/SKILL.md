@@ -57,10 +57,14 @@ land whole — but the number gets stated, because a slicing error that stays in
 
 1. Commit, naming the phase and the task.
 2. Tick the checkbox in the plan file, in the same commit or the one right after.
-3. Merge `--no-ff` into the integration branch and delete the ticket branch.
-4. If a tracker issue exists: **comment** the merge SHA on it. **Do not close it** — closing is
+3. **Send it for a second read.** Spawn the `fresh-eyes` agent with the Agent tool
+   (`subagent_type: fresh-eyes`) on this slice's diff. It reviews on Standards and Spec with no
+   memory of writing the code. Act on what it returns before merging — findings it raises are
+   cheaper to fix here than after the merge. If it finds nothing, say so and carry on.
+4. Merge `--no-ff` into the integration branch and delete the ticket branch.
+5. If a tracker issue exists: **comment** the merge SHA on it. **Do not close it** — closing is
    the human's call, or happens at PR merge.
-5. Report in three lines: what landed, what you verified it with, and anything you flagged
+6. Report in three lines: what landed, what you verified it with, and anything you flagged
    rather than fixed.
 
 Then stop. The next task is the next iteration's problem.

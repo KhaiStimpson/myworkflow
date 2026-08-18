@@ -1,7 +1,7 @@
 ---
 name: start
-description: The front door. Investigate the task silently, announce the route in three lines with a one-token veto, then run it. Use when a new piece of work arrives and it is not obvious whether it needs a plan, a design pass, a single slice, or just doing.
-disable-model-invocation: true
+description: The front door for any new piece of work. Investigate the task, announce a route in three lines with a one-token veto, then run it. Use when work arrives and it is not obvious whether it needs a plan, a design pass, a single slice, or just doing.
+when_to_use: At the start of any new piece of work - a feature, a bug, a refactor, a redesign, a question that turns into work. Trigger phrases include "let's build", "I want to add", "can you fix", "we need to", "help me with", and any task that arrives without a stated route.
 ---
 
 A task has arrived. Your job is to route it — and to be **cheap to correct**. The whole
@@ -32,9 +32,9 @@ Apply the tests in this order, because a higher answer dominates the ones below 
 4. Otherwise → **Route 0 — Direct.** Do it here. Write no orchestration files at all.
 
 **Invoke means invoke — call the named skill yourself with the Skill tool and carry on inside
-this conversation.** Do not tell the user to type a slash command; `/flow:design`, `/flow:plan`
-and the rest are not shell commands and typing them outside Claude Code will only produce a
-"command not found" error. The only thing the user types is `/flow:start` itself.
+this conversation.** Never hand the user a `/flow:*` command to type in place of invoking it
+yourself; routing them back to the keyboard is the whole failure this front door exists to
+prevent.
 
 Uncertainty biases **up**, never down. Route 0 protects itself through the veto, not through
 optimism.
@@ -70,7 +70,9 @@ it downstream.
 
 - Every route above 0 leaves a **durable file**. A route whose only output lives in this
   conversation has produced nothing.
-- Any load-bearing external fact goes to the `researcher` agent in the background rather than
-  being asserted from memory.
+- Any load-bearing external fact — a vendor limit, a pricing tier, a licence term, a platform
+  behaviour — goes to the `researcher` agent rather than being asserted from memory. **Spawn it
+  with the Agent tool, `subagent_type: researcher`, in the background**, and carry on routing
+  while it runs. Naming the agent in prose without calling it is the failure mode here.
 - The test posture is a **per-repo** question, never assumed. If the repo does not answer it, ask
   once and record the answer in the plan's ground rules.

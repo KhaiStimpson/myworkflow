@@ -55,13 +55,9 @@ Route 2 is what you actually do most, and its heart is a prompt you have hand-wr
 re-pasted ~20 times verbatim. `/flow:plan` now generates it with the plan, so the plan and the
 prompt that executes it can never drift:
 
-```
-Open <plan file>, find the FIRST unchecked task, and implement only that one task.
-Follow the Ground rules section exactly. Then <build cmd> and <test cmd>, tick the
-checkbox, and commit with a message naming the phase and task. If the task is
-ambiguous, blocked, or needs a decision I should make, stop and ask instead of
-guessing. Do not skip ahead.
-```
+Its anatomy lives in exactly one place — [`templates/loop-prompt.md`](templates/loop-prompt.md)
+— and `/flow:plan` fills that template in rather than paraphrasing it, so the plan, the prompt
+and the documentation cannot drift apart.
 
 Run it with `/loop` (unattended, repeats) or `/goal` (drives to completion). The plan file is the
 state; the loop is stateless. That is why a crashed session costs nothing.
@@ -76,7 +72,7 @@ ask for four separate times.
 
 ## How this relates to Orchestrator
 
-[`worker/.scratch/orchestrator/spec.md`](../worker/.scratch/orchestrator/spec.md) specifies the
+Orchestrator (a separate, private repo) specifies the
 automated version of this same routing model — conductors, spawned sessions, context packs,
 status files. The routes here are deliberately the same four so that nothing you learn now is
 thrown away. The difference is who drives: **here, you do.** This is the hand-driven system you

@@ -17,7 +17,8 @@ written is the normal case, not an exception.
 
 ## The file
 
-`docs/<effort>-plan.md`. Use [`templates/plan.md`](../../templates/plan.md) as the skeleton.
+`docs/<effort>-plan.md`. Read `${CLAUDE_PLUGIN_ROOT}/templates/plan.md` and use it as the
+skeleton.
 
 - **Phases** in dependency order, each with a one-line goal you could judge.
 - **Tasks as checkboxes**, each one a single sitting's work with an obvious done-state. If a task
@@ -37,18 +38,11 @@ Ground rules so the loop never re-asks.
 
 ## The loop prompt
 
-Emit it in a fenced block at the end, ready to paste after `/loop` or `/goal`, filled in with the
-real file path and real commands. The anatomy is fixed — see
-[`templates/loop-prompt.md`](../../templates/loop-prompt.md):
-
-```
-Open docs/<effort>-plan.md. Find the FIRST unchecked task in the checklist and implement
-only that one task, following its phase description and the Ground rules section exactly.
-Then run <build> and <test>. Tick that item [x]. Commit with a message naming the phase
-and task. Implement exactly one item per iteration. If the task is ambiguous, blocked, or
-needs a decision I should make, stop and ask instead of guessing. Do not skip ahead. If
-all items are checked, stop the loop.
-```
+The anatomy is fixed and it lives in exactly one place. Read
+`${CLAUDE_PLUGIN_ROOT}/templates/loop-prompt.md`, fill the template in with the real file path
+and the real build and test commands, and emit it in a fenced block at the end ready to paste
+after `/loop` or `/goal`. **Do not reconstruct the prompt from memory** — the template is
+canonical, and a paraphrase is how the plan and its engine drift apart.
 
 Say which to use: **`/loop`** for unattended repetition, **`/goal`** to drive to completion in
 one attended session.

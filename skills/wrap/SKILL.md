@@ -10,7 +10,7 @@ Two different endings. Read which one you are at before writing anything.
 Write or update `HANDOFF-<effort>.md` at the repo root, **untracked** — working state stays out of
 git; decisions go in the plan and the design record, which are committed.
 
-Use [`templates/handoff.md`](../../templates/handoff.md). It carries:
+Read `${CLAUDE_PLUGIN_ROOT}/templates/handoff.md` and use it as the skeleton. It carries:
 
 - **Where we are** — the phase, the last task landed, the branch, and the last commit SHA.
 - **Next action** — the single next thing, concrete enough to start on without re-deriving it.
