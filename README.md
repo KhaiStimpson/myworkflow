@@ -25,9 +25,16 @@ claude plugin install flow@myworkflow
 
 ## The commands
 
+Two you need to remember. Seven more underneath, for when you want to drive one stage by hand.
+
 | | |
 |---|---|
-| `/flow:start` | Front door. Investigates, announces a route in three lines, one-token veto. |
+| `/flow` | **Macro.** Front door — routes the task, then runs the route end to end. |
+| `/flow:go` | **Macro.** Advances the live effort by one task. Repeat, or hand to `/loop`. |
+
+| | |
+|---|---|
+| `/flow:start` | Investigates, announces a route in three lines, one-token veto. |
 | `/flow:explore` | Brainstorm with zero file changes → artifact of options with a recommendation. |
 | `/flow:design` | Three variants, desktop + mobile, one HTML artifact → a decisions record that outranks the mockup. |
 | `/flow:plan` | Phased checkbox plan in `docs/` **plus the loop prompt that executes it**. Implements nothing. |
@@ -36,18 +43,18 @@ claude plugin install flow@myworkflow
 | `/flow:wrap` | Handoff file, or integration PR + tracker comments + README with screenshots. |
 
 Two agents run in the background: **`researcher`** (primary sources, inline citations, writes to
-`docs/research/`) and **`fresh-eyes`** (reviews a slice on Standards and Spec, on sonnet).
+`docs/research/`) and **`fresh-eyes`** (reviews a slice on Standards and Spec before it merges).
 
 ## The short version
 
 ```
-/flow:start  →  explore / design (if the answer is a picture)
-             →  /flow:plan  →  paste the generated prompt after /loop or /goal
-             →  /flow:work per task  →  /flow:eyes  →  /flow:wrap
+/flow <the task>   →  routes it, runs it
+/flow:go           →  one task at a time, until the plan is done
 ```
 
-Small work skips straight to route 0 and none of this applies. That is the point of the front
-door.
+Under the hood that is still `start → explore/design → plan → work → eyes → wrap`, and any of
+those can be invoked directly when you want just that stage. Small work skips to route 0 and none
+of it applies. That is the point of the front door.
 
 ## Design notes
 

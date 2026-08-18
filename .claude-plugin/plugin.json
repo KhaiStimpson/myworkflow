@@ -16,6 +16,8 @@
     "engineering"
   ],
   "skills": [
+    "./skills/flow",
+    "./skills/go",
     "./skills/start",
     "./skills/explore",
     "./skills/design",
