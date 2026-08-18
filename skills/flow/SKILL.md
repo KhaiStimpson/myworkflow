@@ -23,7 +23,7 @@ This is a macro. It runs the whole loop so no one has to remember which stage co
    | 0 Direct | Nothing. Do the work here, then stop. |
    | 1 Slice | `work` → `wrap` |
    | 2 Planned | `plan`, then stop and present the phases. |
-   | 3 Foggy | The foggy-route skill, then re-enter at route 2. |
+   | 3 Foggy | `${user_config.fog_skill}`, then re-enter at route 2. |
 
    If the design axis fired, `design` runs **first**, whatever the route.
 

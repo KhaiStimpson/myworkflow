@@ -26,8 +26,8 @@ structurally cannot know — intent and appetite: at most one about size, one ab
 Apply in order. A higher answer dominates the ones below it.
 
 1. **Anything material still undecided?** → **Route 3 — Foggy.** Invoke the
-   `mattpocock-skills:wayfinder` skill, resolve until nothing is left to decide, then re-enter
-   at route 2.
+   `${user_config.fog_skill}` skill, resolve until nothing is left to decide, then re-enter at
+   route 2. Route 3 is the only route that stops for confirmation first.
 2. **More than one reviewable change (~400 lines)?** → **Route 2 — Planned.** Invoke `plan`.
 3. **Needs a fresh context window of focused work?** → **Route 1 — Slice.** Invoke `work`.
 4. Otherwise → **Route 0 — Direct.** Do it here. Write no orchestration files at all.

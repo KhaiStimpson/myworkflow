@@ -8,13 +8,22 @@ Your working loop, packaged as a Claude Code plugin — derived from ~40 of your
 
 ## Install
 
-```bash
-claude plugin marketplace add KhaiStimpson/myworkflow
-```
+`flow` depends on [`mattpocock-skills`](https://github.com/mattpocock/skills) for its foggy
+route, so add that marketplace **first** — a declared dependency that cannot be resolved leaves
+`flow` disabled until it is:
 
 ```bash
+claude plugin marketplace add mattpocock/skills
+```
+
+Then:
+
+```bash
+claude plugin marketplace add KhaiStimpson/myworkflow
 claude plugin install flow@myworkflow
 ```
+
+Installing `flow` pulls in `mattpocock-skills` automatically, and enabling `flow` enables it too.
 
 Or, working from a local clone:
 
@@ -22,6 +31,12 @@ Or, working from a local clone:
 claude plugin marketplace add /path/to/myworkflow
 claude plugin install flow@myworkflow
 ```
+
+### Configuration
+
+| Option | Default | What it does |
+|---|---|---|
+| **Foggy-route skill** | `mattpocock-skills:grill-me` | The skill route 3 invokes when something material is still undecided. Set it to `mattpocock-skills:wayfinder` when the work spans more sessions than one agent can hold and you want decision tickets on a tracker. |
 
 ## The commands
 
@@ -68,3 +83,16 @@ integration-branch topology, three variants at both breakpoints, "stop and ask r
 and the per-repo test posture all come from your own repeated words. Where the evidence was
 contested — per-ticket versus batched review, test posture — the system asks once and records the
 answer rather than picking for you.
+
+## Credits
+
+Route 3 — the foggy route, where something material is still undecided — is answered by
+**[Matt Pocock's skills](https://github.com/mattpocock/skills)**, declared as a plugin
+dependency. Nothing is vendored, forked or copied; the plugin is installed alongside this one and
+updates on his schedule.
+
+- **`grill-me`** (the default) interviews a plan until every design branch resolves.
+- **`wayfinder`** (optional) plans work spanning many sessions as decision tickets on a tracker.
+
+MIT License, © 2026 Matt Pocock — [github.com/mattpocock/skills](https://github.com/mattpocock/skills)
+· [aihero.dev](https://www.aihero.dev)

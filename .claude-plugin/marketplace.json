@@ -5,6 +5,9 @@
     "email": "khai@stimpson.dev"
   },
   "description": "Khai's personal working loop, packaged as an installable Claude Code plugin.",
+  "allowCrossMarketplaceDependenciesOn": [
+    "mattpocock"
+  ],
   "plugins": [
     {
       "name": "flow",

@@ -29,5 +29,19 @@
   "agents": [
     "./agents/researcher.md",
     "./agents/fresh-eyes.md"
-  ]
+  ],
+  "dependencies": [
+    {
+      "name": "mattpocock-skills",
+      "marketplace": "mattpocock"
+    }
+  ],
+  "userConfig": {
+    "fog_skill": {
+      "type": "string",
+      "title": "Foggy-route skill",
+      "description": "Skill invoked on route 3, when something material is still undecided. Defaults to grill-me, which interviews a plan until every branch resolves. Use mattpocock-skills:wayfinder instead when the work spans more sessions than one agent can hold and you want decision tickets on your tracker.",
+      "default": "mattpocock-skills:grill-me"
+    }
+  }
 }
