@@ -1,0 +1,33 @@
+{
+  "SessionStart": [
+    {
+      "matcher": "startup|resume",
+      "hooks": [
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-state.sh"]
+        }
+      ]
+    }
+  ],
+  "PreCompact": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"]
+        }
+      ]
+    }
+  ],
+  "SessionEnd": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"]
+        }
+      ]
+    }
+  ]
+}

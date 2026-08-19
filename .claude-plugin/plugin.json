@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "flow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Khai's working loop as a plugin — route the task, explore or design before code, write a phased plan with the loop prompt that executes it, work one slice at a time, look at the running app on desktop and mobile, then hand off.",
   "author": {
     "name": "Khai",
@@ -16,6 +16,8 @@
     "engineering"
   ],
   "skills": [
+    "./skills/flow",
+    "./skills/go",
     "./skills/start",
     "./skills/explore",
     "./skills/design",
@@ -27,5 +29,20 @@
   "agents": [
     "./agents/researcher.md",
     "./agents/fresh-eyes.md"
-  ]
+  ],
+  "hooks": "./hooks/hooks.json",
+  "dependencies": [
+    {
+      "name": "mattpocock-skills",
+      "marketplace": "mattpocock"
+    }
+  ],
+  "userConfig": {
+    "fog_skill": {
+      "type": "string",
+      "title": "Foggy-route skill",
+      "description": "Skill invoked on route 3, when something material is still undecided. Defaults to grill-me, which interviews a plan until every branch resolves. Use mattpocock-skills:wayfinder instead when the work spans more sessions than one agent can hold and you want decision tickets on your tracker.",
+      "default": "mattpocock-skills:grill-me"
+    }
+  }
 }

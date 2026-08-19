@@ -1,58 +1,50 @@
 ---
 name: start
-description: The front door. Investigate the task silently, announce the route in three lines with a one-token veto, then run it. Use when a new piece of work arrives and it is not obvious whether it needs a plan, a design pass, a single slice, or just doing.
-disable-model-invocation: true
+description: The front door for any new piece of work. Investigate the task, announce a route in three lines with a one-token veto, then run it. Use when work arrives and it is not obvious whether it needs a plan, a design pass, a single slice, or just doing.
+when_to_use: At the start of any new piece of work - a feature, a bug, a refactor, a redesign, a question that turns into work. Trigger phrases include "let's build", "I want to add", "can you fix", "we need to", "help me with", and any task that arrives without a stated route.
+model: sonnet
+effort: low
 ---
 
-A task has arrived. Your job is to route it — and to be **cheap to correct**. The whole
-protection of the small routes is that the proposal is fast to veto, so a wrong route costs one
-character, not an explanation.
+Route the work, and be **cheap to correct**. A wrong route must cost one character, not an
+explanation.
 
-## Investigate before you ask
+## What the repo already says
 
-Read the task. Read whatever repo guidance is already privileged (`CLAUDE.md`, `AGENTS.md`,
-`CONTEXT.md`, `docs/`). Then run **at most two** targeted probes, and before each one name the
-boundary it tests and the result that settles it. A probe you cannot describe that way is
-curiosity, not investigation — skip it.
+- Branch: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
+- Plan files: !`ls docs/*-plan.md 2>/dev/null || echo none`
+- First unchecked task: !`grep -h -m1 -- '- \[ \]' docs/*-plan.md 2>/dev/null || echo none`
+- Privileged guidance: !`ls CLAUDE.md AGENTS.md CONTEXT.md 2>/dev/null || echo none`
+- Handoff: !`ls HANDOFF-*.md 2>/dev/null || echo none`
 
-Questions are reserved for what the repo **structurally cannot know**: intent and appetite. At
-most one question about size and one about design. Everything else you decide and announce.
+Read whatever that found before deciding anything, then run **at most two** further probes,
+naming the boundary each tests before you run it. Questions are reserved for what the repo
+structurally cannot know — intent and appetite: at most one about size, one about design.
 
-## The four routes
+## Route it
 
-Apply the tests in this order, because a higher answer dominates the ones below it.
+Apply in order. A higher answer dominates the ones below it.
 
-1. **Is anything material still undecided?** → **Route 3 — Foggy.**
-   Invoke the `mattpocock-skills:wayfinder` skill. Resolve decisions until nothing is left to
-   decide, then re-enter at route 2.
-2. **Does it exceed one reviewable change (~400 lines)?** → **Route 2 — Planned.**
-   Invoke the `plan` skill.
-3. **Does it need a fresh context window of focused work?** → **Route 1 — Slice.**
-   Invoke the `work` skill.
+1. **Anything material still undecided?** → **Route 3 — Foggy.** Invoke the
+   `${user_config.fog_skill}` skill, resolve until nothing is left to decide, then re-enter at
+   route 2. Route 3 is the only route that stops for confirmation first.
+2. **More than one reviewable change (~400 lines)?** → **Route 2 — Planned.** Invoke `plan`.
+3. **Needs a fresh context window of focused work?** → **Route 1 — Slice.** Invoke `work`.
 4. Otherwise → **Route 0 — Direct.** Do it here. Write no orchestration files at all.
 
-**Invoke means invoke — call the named skill yourself with the Skill tool and carry on inside
-this conversation.** Do not tell the user to type a slash command; `/flow:design`, `/flow:plan`
-and the rest are not shell commands and typing them outside Claude Code will only produce a
-"command not found" error. The only thing the user types is `/flow:start` itself.
-
-Uncertainty biases **up**, never down. Route 0 protects itself through the veto, not through
-optimism.
+**Invoke means invoke** — call the named skill yourself with the Skill tool and carry on in this
+conversation. Never hand the user a `/flow:*` command to type in place of invoking it. And
+uncertainty biases **up**, never down.
 
 ## The design axis, evaluated every time
 
 Independent of size. It fires when **more than one defensible visual answer exists** — not merely
-because a UI file will change. Fixing a wrong colour is not a design question; deciding what the
-page should feel like is. When it fires, invoke the `design` skill **first**, whatever the route,
-before invoking whichever route's skill follows.
+because a UI file changes. Fixing a wrong colour is not a design question; deciding what the page
+should feel like is. When it fires, invoke `design` **first**, whatever the route.
 
-Historically this is the most common shape of your work and the easiest one to mis-route: a UI
-request that lands in route 1 produces code where three mockups were wanted.
+## Announce, then proceed
 
-## The announcement
-
-Three lines, then proceed after a beat. Do not stop for confirmation — except on route 3, where
-chartering a map is an expensive commitment.
+Three lines, then go — no confirmation except on route 3.
 
 ```
 Route 2 — Planned. Four phases, touches the parser and two views.
@@ -62,15 +54,17 @@ Probe: docs/ has no plan file for this effort, so this is new work.
 Say a route number to override, `design` to toggle the design pass, or `0` to just do it.
 ```
 
-State a probe finding only when a probe actually ran, and keep it to one line. If you asked a
-question, its answer becomes an operative scope constraint — carry it forward, do not re-litigate
-it downstream.
+State a probe finding only when a probe actually ran. An answer you asked for becomes a binding
+scope constraint — carry it forward, do not re-litigate it downstream.
 
-## Standing obligations for whatever you route to
+## Standing obligations
 
-- Every route above 0 leaves a **durable file**. A route whose only output lives in this
-  conversation has produced nothing.
-- Any load-bearing external fact goes to the `researcher` agent in the background rather than
-  being asserted from memory.
-- The test posture is a **per-repo** question, never assumed. If the repo does not answer it, ask
-  once and record the answer in the plan's ground rules.
+- Every route above 0 leaves a **durable file**. A route whose only output is this conversation
+  has produced nothing.
+- Load-bearing external facts — vendor limits, pricing, licence terms, platform behaviour — go
+  to the `researcher` agent: **spawn it with the Agent tool, `subagent_type: researcher`, in the
+  background** and carry on routing. Naming the agent without calling it is the failure here.
+- Test posture is **per-repo**, never assumed. If the repo does not answer it, ask once and
+  record the answer in the plan's ground rules.
+
+Why these routes and not others: `reference.md`.
