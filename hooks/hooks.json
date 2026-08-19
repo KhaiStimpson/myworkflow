@@ -10,33 +10,6 @@
       ]
     }
   ],
-  "PreToolUse": [
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "if": "Bash(git commit *)",
-          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/gate-screenshots.sh"]
-        },
-        {
-          "type": "command",
-          "if": "Bash(git push *)",
-          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/guard-branches.sh"]
-        },
-        {
-          "type": "command",
-          "if": "Bash(git merge *)",
-          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/guard-branches.sh"]
-        },
-        {
-          "type": "command",
-          "if": "Bash(dotnet ef *)",
-          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/guard-branches.sh"]
-        }
-      ]
-    }
-  ],
   "PreCompact": [
     {
       "hooks": [

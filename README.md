@@ -62,14 +62,12 @@ Two agents run in the background: **`researcher`** (primary sources, inline cita
 
 ## The hooks
 
-Four rules are enforced by hooks rather than prose, so they hold regardless of which model is
+Two rules are enforced by hooks rather than prose, so they hold regardless of which model is
 driving. Each exits silently when it does not apply — a repo with no live effort pays nothing.
 
 | | When | What it does |
 |---|---|---|
 | **Session state** | session start / resume | Injects the live effort, phase, next unchecked task and branch. Resuming costs no keystrokes. |
-| **Screenshot gate** | before `git commit` | Blocks a commit staging UI files when `docs/screenshots/<slug>/` is empty. Override with `[skip-eyes]` in the message. |
-| **Branch guard** | before `git push` / `git merge` | Blocks anything targeting `dev` or `main` while an integration branch is live. Blocks migration re-scaffold and squash, in repos that have migrations. |
 | **Handoff spine** | session end, pre-compact | Writes branch, SHA, phase, next task and dirty files into `HANDOFF-<effort>.md`, between markers. It never touches the prose sections — a hook cannot write "what must not be re-litigated", and `/flow:wrap` still owns those. |
 
 The scripts are POSIX `sh`. **On Windows they need Git Bash**, which is how Claude Code runs

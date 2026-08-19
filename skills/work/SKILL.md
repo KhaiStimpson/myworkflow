@@ -22,7 +22,7 @@ integration/<effort>                    cut from dev, long-lived, one per effort
 ```
 
 `dev` is the default branch, not `main`. Nothing reaches `dev` until the whole effort is
-reviewed — a hook enforces that too.
+reviewed.
 
 3. **If the task is ambiguous, blocked, or needs a decision that is not yours — stop and ask.**
    Do not guess. This is what makes unattended running safe.
@@ -44,8 +44,8 @@ reviewed — a hook enforces that too.
 1. Run the build.
 2. Run the test suite **if the ground rules say there is one**. Do not invent a test posture the
    effort decided against, or skip one it decided for.
-3. **If this slice touches UI, invoke `eyes` before committing.** A commit hook enforces this,
-   so skipping it costs a round trip rather than shipping unseen.
+3. **If this slice touches UI, invoke `eyes` before committing.** A green build is not done
+   for anything a person can see.
 
 ## Land it
 
