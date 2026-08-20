@@ -127,6 +127,17 @@ steered this way and it demonstrably paid off.
 the MVP", "whats teh cheapes option here?", "Sounds good but also costly on tokens any other
 ideas to save on tokens". Prefer free, already-owned, and cheap-model tiers; state the cost line.
 
+## Agents
+
+**A1 — Agents run on fresh context, never forked. Strong — stated directly.**
+"noticed subagents are forking, I don't want that in this flow", and, of a plan that followed a
+long grill session, "this should spawn a background agent so it has fresh context to complete
+it". So no skill in this plugin sets `context: fork` and nothing spawns `subagent_type: fork`.
+The reason it holds beyond the preference: a forked reviewer inherits the reasoning that wrote
+the code, and a forked loop re-reads an interview every iteration to learn what the plan file
+already states. Agents derive what changed from the diff, the plan and the handoff instead —
+durable state that outlives the session.
+
 ## Stack (andrew-crm-scoped — do not globalise)
 
 **S1** Vertical slices + clean architecture, **no MediatR, no AutoMapper**. You hold the

@@ -36,8 +36,12 @@ repo; if it does not answer, **ask once**, and record the answer so the loop nev
 
 ## Record the effort, so the rest of the flow can find it
 
-Write the effort slug to `.flow/current` (create the directory if needed). `/flow:go` and the
+Write the effort slug to `.flow/current` (create the directory if needed). `/flow:loop` and the
 session hooks read it; without it they have to guess which effort is live.
+
+If a fog session preceded this plan, leave `.flow/fog` alone — `/flow:loop` reads it to decide
+whether to run the loop here or hand it to a fresh agent. Do not write it yourself; `start` owns
+it.
 
 ## The loop prompt
 
@@ -46,8 +50,9 @@ The anatomy is fixed and lives in exactly one place. Read
 build and test commands, and emit it in a fenced block at the end. **Do not reconstruct it from
 memory** — a paraphrase is how the plan and its engine drift apart.
 
-Say which to use: **`/loop`** for unattended repetition, **`/goal`** to drive to completion in
-one attended session, or **`/flow:go`** to advance one task at a time by hand.
+Then say, in one line, that **`/flow:loop`** starts it — it fills this same template in from the
+plan and hands it to `/loop`, so nobody has to paste anything. `/goal` remains available for
+driving to completion in one attended session.
 
 ## Stop here
 
