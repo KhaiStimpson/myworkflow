@@ -3,9 +3,6 @@ name: eyes
 description: Run the app, look at it at desktop and mobile widths, and capture durable screenshots — the review pass that green tests do not perform. Use before committing any UI-touching change, and before asking for approval on visual work.
 model: sonnet
 effort: medium
-context: fork
-agent: general-purpose
-background: false
 paths: ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/*.razor", "**/*.cshtml", "**/*.xaml", "**/*.css", "**/*.scss", "**/*.html"]
 allowed-tools: Read, Glob, Grep, Bash(npx playwright *), Bash(*chrome-headless-shell*), Bash(mkdir *), Bash(npm run *), Bash(pnpm *), Bash(yarn *), Bash(dotnet run *)
 ---
@@ -14,8 +11,9 @@ Run the app and look at it. Every front-end defect in the mined corpus was found
 looking at the running app **after** a green test run. The suite asserts behaviour; nobody was
 asserting appearance.
 
-You are running in a forked context. You have the repo and the running app, not the
-conversation — derive what changed from the git diff and the working tree.
+Assume you have the repo and the running app, not the conversation — derive what changed from
+the git diff and the working tree. When `work` hands this pass to a subagent it spawns a **fresh**
+one, never a fork of the conversation, so nothing here may depend on transcript you cannot see.
 
 ## Procedure
 

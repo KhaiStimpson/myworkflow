@@ -21,5 +21,6 @@ printf '  plan:     %s (%s done, %s remaining)\n' "$plan" "$done_n" "$todo_n"
 printf '  branch:   %s\n' "$branch"
 printf '  next:     %s\n' "$next"
 [ -f "HANDOFF-$slug.md" ] && printf '  handoff:  HANDOFF-%s.md - read it before deciding anything\n' "$slug"
-printf 'Run /flow:go to advance one task. Do not start a second effort alongside this one.\n'
+[ -f .flow/fog ] && printf '  fog:      %s - a fog session preceded this plan\n' "$(tr -d '\r\n' < .flow/fog)"
+printf 'Run /flow:loop to execute the plan. Do not start a second effort alongside this one.\n'
 exit 0

@@ -44,20 +44,31 @@ reviewed.
 1. Run the build.
 2. Run the test suite **if the ground rules say there is one**. Do not invent a test posture the
    effort decided against, or skip one it decided for.
-3. **If this slice touches UI, invoke `eyes` before committing.** A green build is not done
-   for anything a person can see.
+3. **If this slice touches UI, run `eyes` before committing.** A green build is not done for
+   anything a person can see. Hand it to a **fresh** subagent — the Agent tool with
+   `subagent_type: general-purpose`, `run_in_background: false`, and a prompt telling it to invoke
+   the `eyes` skill on this slice — so launching the app and capturing screenshots does not land
+   in this context. Fresh, never forked: see the note at the bottom.
 
 ## Land it
 
 1. Commit, naming the phase and the task.
 2. Tick the checkbox in the plan file, in the same commit or the one right after.
 3. Spawn the Agent tool with `subagent_type: fresh-eyes` on this slice's diff. Act on what it
-   returns before merging. If it finds nothing, say so and carry on.
+   returns before merging. If it finds nothing, say so and carry on. It reviews on fresh context
+   by design — a fork of this conversation would only agree with the reasoning that wrote the
+   code.
 4. Merge `--no-ff` into the integration branch and delete the ticket branch.
 5. If a tracker issue exists: **comment** the merge SHA on it. **Do not close it.**
 6. Report in three lines: what landed, what you verified it with, and what you flagged rather
    than fixed.
 
 Then stop. The next task is the next iteration's problem.
+
+## Every subagent here starts fresh
+
+`eyes`, `fresh-eyes`, `researcher`, an `Explore` pass — all of them are spawned as **new agents on
+fresh context**. Never `subagent_type: fork`, and never `context: fork` in a skill's frontmatter.
+The point of a second reader is that it did not sit through the first one.
 
 Why the topology and the stop-rule are shaped this way: `reference.md`.

@@ -45,7 +45,7 @@ Two you need to remember. Seven more underneath, for when you want to drive one 
 | | |
 |---|---|
 | `/flow` | **Macro.** Front door — routes the task, then runs the route end to end. |
-| `/flow:go` | **Macro.** Advances the live effort by one task. Repeat, or hand to `/loop`. |
+| `/flow:loop` | **Macro.** Starts the loop that executes the live plan — fills the loop prompt in from the plan and hands it to `/loop`. After a fog session it spawns a fresh background agent instead. |
 
 | | |
 |---|---|
@@ -59,6 +59,11 @@ Two you need to remember. Seven more underneath, for when you want to drive one 
 
 Two agents run in the background: **`researcher`** (primary sources, inline citations, writes to
 `docs/research/`) and **`fresh-eyes`** (reviews a slice on Standards and Spec before it merges).
+
+**Every agent this flow spawns starts on fresh context — never a fork of the conversation.** No
+skill here uses `context: fork`, and nothing spawns `subagent_type: fork`. A forked reviewer
+inherits the reasoning that wrote the code and agrees with it; a forked loop re-reads the whole
+transcript on every iteration to learn what the plan file already says.
 
 ## The hooks
 
@@ -77,7 +82,7 @@ hooks there.
 
 ```
 /flow <the task>   →  routes it, runs it
-/flow:go           →  one task at a time, until the plan is done
+/flow:loop         →  starts the loop that walks the plan to done
 ```
 
 Under the hood that is still `start → explore/design → plan → work → eyes → wrap`, and any of

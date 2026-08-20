@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "flow",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Khai's working loop as a plugin — route the task, explore or design before code, write a phased plan with the loop prompt that executes it, work one slice at a time, look at the running app on desktop and mobile, then hand off.",
   "author": {
     "name": "Khai",
@@ -17,7 +17,7 @@
   ],
   "skills": [
     "./skills/flow",
-    "./skills/go",
+    "./skills/loop",
     "./skills/start",
     "./skills/explore",
     "./skills/design",

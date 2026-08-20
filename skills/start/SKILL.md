@@ -27,7 +27,10 @@ Apply in order. A higher answer dominates the ones below it.
 
 1. **Anything material still undecided?** → **Route 3 — Foggy.** Invoke the
    `${user_config.fog_skill}` skill, resolve until nothing is left to decide, then re-enter at
-   route 2. Route 3 is the only route that stops for confirmation first.
+   route 2. Route 3 is the only route that stops for confirmation first. **Record that it ran** —
+   write the skill name and the date to `.flow/fog`, creating the directory if needed. That one
+   line is how `/flow:loop` knows this conversation is carrying an interview and hands execution
+   to a fresh agent instead of looping on top of it.
 2. **More than one reviewable change (~400 lines)?** → **Route 2 — Planned.** Invoke `plan`.
 3. **Needs a fresh context window of focused work?** → **Route 1 — Slice.** Invoke `work`.
 4. Otherwise → **Route 0 — Direct.** Do it here. Write no orchestration files at all.
@@ -64,6 +67,9 @@ scope constraint — carry it forward, do not re-litigate it downstream.
 - Load-bearing external facts — vendor limits, pricing, licence terms, platform behaviour — go
   to the `researcher` agent: **spawn it with the Agent tool, `subagent_type: researcher`, in the
   background** and carry on routing. Naming the agent without calling it is the failure here.
+- **Every agent this flow spawns starts on fresh context.** Never `subagent_type: fork`, never
+  `context: fork` in a skill's frontmatter — a forked agent inherits this conversation and returns
+  its assumptions back to it.
 - Test posture is **per-repo**, never assumed. If the repo does not answer it, ask once and
   record the answer in the plan's ground rules.
 

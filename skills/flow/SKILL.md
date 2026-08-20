@@ -28,15 +28,22 @@ This is a macro. It runs the whole loop so no one has to remember which stage co
    If the design axis fired, `design` runs **first**, whatever the route.
 
 4. **Route 2 stops at the plan.** Implementation starts on an explicit go, and it starts in
-   `/flow:go` or the loop prompt — never inside this macro. Presenting a plan and then building
-   it unasked is the one way this macro can do real damage.
+   `loop` — never inside this macro. Presenting a plan and then building it unasked is the one way
+   this macro can do real damage.
+
+5. **On the go, invoke `loop`.** It fills in the loop prompt from the plan and starts the engine.
+   If route 3 fired on the way here, `loop` will hand execution to a fresh background agent rather
+   than loop on top of the interview — that is deliberate, and this macro does not override it.
 
 ## Never hand back a command
 
 Every stage here is a skill you invoke, not a command the user types. The only things they should
-ever need to type are `/flow` and `/flow:go`.
+ever need to type are `/flow` and `/flow:loop`.
+
+And every agent any of these stages spawns starts on **fresh context** — never `subagent_type:
+fork`, never `context: fork` in frontmatter.
 
 ## When the loop is already running
 
 If `.flow/current` exists and names a live effort, this is probably not new work — say so in one
-line and offer `/flow:go` instead of starting a second effort alongside the first.
+line and invoke `loop` instead of starting a second effort alongside the first.
