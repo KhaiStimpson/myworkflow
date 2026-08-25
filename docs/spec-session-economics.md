@@ -29,12 +29,17 @@ I also cannot see any of this while it is happening. There is no signal in the s
 The flow gains a **context budget** it actively manages, instead of a context ceiling it
 eventually hits.
 
-A hook watches the live context size and, when it crosses a threshold, tells the running loop to
-finish its current task, write the handoff, and stop. `/flow:loop` then continues the plan in a
-**fresh background agent on clean context**, which reads the plan and the handoff and nothing
-else. The plan file is already the state; this makes the session genuinely disposable, so an
-effort becomes a chain of short cheap sessions rather than one long expensive one. Auto-compaction
-stops being the thing that ends a session — a task boundary is.
+**One phase, one session.** When the loop ticks the last task in a phase, it writes the handoff,
+commits, and stops. `/flow:loop` then continues the next phase in a **fresh background agent on
+clean context**, which reads the plan and the handoff and nothing else. The plan file is already
+the state; this makes the session genuinely disposable, so an effort becomes a chain of short cheap
+sessions rather than one long expensive one. Auto-compaction stops being the thing that ends a
+session — a phase boundary is.
+
+For that to work, phases have to be sized to fit a session, which today nothing enforces. So
+`/flow:plan` gains a sizing constraint alongside its existing dependency ordering. And because a
+single runaway task can still blow a session from inside one phase, a context check runs as a
+backstop — not as the trigger.
 
 Alongside that, the two measured leaks get plugged at the source: image reads that put 200K-char
 payloads into the transcript, and test-output dumps that put build noise there. Both are filtered
@@ -46,51 +51,56 @@ afterwards.
 
 ## User Stories
 
-1. As a developer running a long effort, I want the session to hand off to a fresh one at a
-   context threshold I set, so that I choose the boundary instead of auto-compaction choosing it.
-2. As a developer, I want the handoff to fire on a task boundary rather than mid-task, so that the
-   next session never inherits half-finished work.
+1. As a developer running a long effort, I want each phase of the plan to run in its own session,
+   so that the boundary is a meaningful unit of work rather than an arbitrary token count.
+2. As a developer, I want the handoff to fire when a phase completes rather than mid-task, so that
+   the next session never inherits half-finished work.
 3. As a developer, I want the next session to start from the plan and the handoff only, so that I
    stop paying to re-read a transcript whose conclusions are already written down.
-4. As a developer, I want the threshold to be configurable per effort, so that a cheap exploratory
-   loop and an expensive implementation loop can budget differently.
-5. As a developer, I want to see the live context size at session start, so that I know whether I
+4. As a developer, I want to know from the plan how many sessions an effort will take, so that its
+   cost is predictable before I start rather than discovered afterwards.
+5. As a developer writing a plan, I want phases sized to fit one session, so that "one phase, one
+   session" is a real guarantee and not an aspiration.
+6. As a developer, I want a phase that is too large to be flagged when the plan is written, so that
+   I can split it before it costs me rather than after.
+7. As a developer, I want a runaway task to be caught even mid-phase, so that a single pathological
+   iteration cannot blow the budget that phase boundaries were supposed to protect.
+8. As a developer, I want to see the live context size at session start, so that I know whether I
    am beginning fresh or resuming something already large.
-6. As a developer, I want a warning before the threshold rather than only at it, so that I can
-   intervene if the current task is nearly done.
-7. As a developer, I want the handoff written automatically at the threshold, so that stopping is
-   never a decision I have to remember to act on.
-8. As a developer, I want the successor agent spawned on fresh context, never forked, so that
-   convention A1 is not quietly eroded by this feature.
-9. As a developer, I want the successor to be one agent, not one per phase, so that the topology
-   Anthropic's docs steer away from for sequential dependent work is not what I build.
-10. As a developer running a UI effort, I want screenshots referenced by path rather than read into
+9. As a developer, I want the handoff written automatically at the phase boundary, so that stopping
+   is never a decision I have to remember to act on.
+10. As a developer, I want the successor agent spawned on fresh context, never forked, so that
+    convention A1 is not quietly eroded by this feature.
+11. As a developer, I want one successor agent carrying the plan forward, not one agent per phase
+    running concurrently, so that the topology Anthropic's docs steer away from for sequential
+    dependent work is not what I build.
+12. As a developer running a UI effort, I want screenshots referenced by path rather than read into
     context by default, so that a review pass does not cost 200K characters per look.
-11. As a developer, I want to be able to read a screenshot deliberately when I actually need to see
+13. As a developer, I want to be able to read a screenshot deliberately when I actually need to see
     it, so that the discipline is a default rather than a prohibition.
-12. As a developer, I want test and build output filtered to failures and a pass count, so that a
+14. As a developer, I want test and build output filtered to failures and a pass count, so that a
     green run costs almost nothing to observe.
-13. As a developer, I want the full unfiltered output kept on disk, so that filtering never
+15. As a developer, I want the full unfiltered output kept on disk, so that filtering never
     destroys the thing I need when something breaks.
-14. As a developer, I want the model choice for loop iterations recorded in the plan's ground
+16. As a developer, I want the model choice for loop iterations recorded in the plan's ground
     rules, so that an effort's cost posture is a decision rather than an accident of whatever was
     selected that day.
-15. As a developer, I want the true cost multiplier stated honestly in the docs, so that I am not
+17. As a developer, I want the true cost multiplier stated honestly in the docs, so that I am not
     making decisions against a number that does not reproduce.
-16. As a developer, I want the measurement script kept in the repo, so that re-deriving these
+18. As a developer, I want the measurement script kept in the repo, so that re-deriving these
     figures costs minutes rather than a research pass.
-17. As a developer, I want to re-run the measurement after the change lands, so that I can tell
+19. As a developer, I want to re-run the measurement after the change lands, so that I can tell
     whether it actually worked instead of assuming it did.
-18. As a developer, I want the whole feature to cost nothing in a repo with no live effort, so that
+20. As a developer, I want the whole feature to cost nothing in a repo with no live effort, so that
     installing the plugin does not tax unrelated work.
-19. As a developer, I want the handoff-at-threshold to be overridable with one word, so that I can
-    tell it to push through when the effort is nearly finished.
-20. As a developer, I want the successor agent's name reported when it spawns, so that I can find
+21. As a developer, I want the phase-boundary stop to be overridable with one word, so that I can
+    tell it to carry straight on when the next phase is small or the effort is nearly finished.
+22. As a developer, I want the successor agent's name reported when it spawns, so that I can find
     it and watch it.
-21. As a developer, I want each session in the chain to commit its work before stopping, so that a
+23. As a developer, I want each session in the chain to commit its work before stopping, so that a
     handoff never depends on uncommitted state surviving.
-22. As a developer, I want to know how many sessions an effort took, so that the chain is visible
-    in retrospect.
+24. As a developer, I want the handoff to record which phase ended it, so that the chain of
+    sessions is visible in retrospect.
 
 ## Implementation Decisions
 
@@ -148,42 +158,95 @@ treats them differently:
 of a stop-and-hand-off instruction, screenshot discipline in a skill — it goes in seam 2 and is
 named as such. New seams beyond these two are not introduced.
 
-### D2 — Rank 1: threshold detection and handoff (the dominant lever)
+### D2 — Rank 1: one phase, one session (the dominant lever)
 
-A new script, `scripts/context-budget.sh`, wired to a hook that fires after each iteration.
+**The trigger is the phase boundary, not a token count.** When the loop ticks the last unchecked
+task under a `## Phase` heading, it commits, updates the handoff, records which phase it finished,
+and stops. The next phase runs in a fresh session (D3).
+
+Chosen over a pure context threshold because the boundary is semantic rather than arbitrary: the
+successor starts on a coherent unit of work, the handoff says "phase 2 complete" instead of "we hit
+350K mid-task", the session count is knowable from the plan before the effort starts (story 4), and
+it reuses state the plan already carries — `scripts/session-state.sh` already greps `^## Phase`.
+
+**The measured basis for phase sizing.** The specimen `4c15e762` re-segmented by loop iteration,
+costed at Opus rates:
+
+| Iter | ctx at end | cost | | Iter | ctx at end | cost |
+|---|---|---|---|---|---|---|
+| 1 | 97,585 | $6.51 | | 13 | 785,787 | **$123.77** |
+| 5 | 213,063 | $7.21 | | 14 | 880,770 | $57.38 |
+| 7 | 262,796 | $8.14 | | 16 | 992,441 | $48.37 |
+| 8 | 340,357 | $17.69 | | **17** | **89,315** ← auto-compact | **$7.24** |
+| 10 | 469,018 | $12.40 | | 20 | 187,752 | $5.14 |
+
+Iterations 17–20, running after the auto-compact dropped context to 89K, cost $4.55–$7.24 — the
+same as iterations 1–7. Iterations 13–16 cost $25–$124 for comparable work. The knee is at
+**~250–300K**: below it an iteration costs $3–8, above it cost escalates fast. Iterations 1–7
+reached 263K and post-compact 17–21 reached 264K in five, so **a session comfortably holds about
+five to seven tasks.**
+
+### D2a — `/flow:plan` must size phases, not just order them
+
+Today `skills/plan/SKILL.md` orders phases by dependency alone — "phases in dependency order, each
+with a one-line goal you could judge" — and nothing constrains how many tasks a phase holds. Under
+D2 that is now load-bearing: a three-task phase wastes a fresh session's warmup, and a fourteen-task
+phase sails past 700K and gets auto-compacted anyway, which is the exact failure this spec exists to
+remove.
+
+So `/flow:plan` gains a sizing constraint: **target five to seven tasks per phase**, derived from
+D2's measurements. Where dependency ordering and sizing conflict, dependency wins and the oversized
+phase is split into `Phase 3a` / `Phase 3b` at the least-coupled seam rather than being reordered.
+A phase that cannot be split below the ceiling is flagged in the plan when it is written (story 6),
+not discovered mid-loop.
+
+This is seam 2 — prose in the plan skill and a note in `templates/plan.md`, whose skeleton currently
+shows two tasks per phase and should show a realistic five.
+
+### D2b — The context check, demoted to a backstop
+
+A phase boundary cannot catch a runaway *task*. In the table above, iteration 13 burned 257 turns
+and $123.77 inside a single iteration — no phase boundary would have interrupted it. So the context
+check survives, as a safety net rather than as the trigger.
+
+`scripts/context-budget.sh`, wired to a hook that fires after each iteration:
+
+- Below the backstop: silent. A hook that prints nothing is free.
+- At or above it: emit the directive to finish the current task, commit, update the handoff, and
+  stop the loop — the same stop D2 performs, fired early and out of band.
+
+Backstop default **400K**, overridable in the plan's ground rules. Deliberately set above the knee
+and above the peak of the cheapest measured session: it should almost never fire, and a session that
+trips it is evidence that D2a's sizing was wrong for that phase, which is worth surfacing in the
+handoff.
 
 **Locating the transcript is solved and does not depend on `transcript_path`.** Verified locally on
-2026-08-26: the live session's transcript is the most recently modified `*.jsonl` in the
-cwd-derived project directory under `~/.claude/projects/`, and its last assistant `usage` record
-yields live context directly. Measured 78,573 tokens on a running session this way. The hook
-payload's `transcript_path` field is used when present and the mtime scan is the fallback, so the
-detector has no unverified dependency.
+2026-08-26: the live session's transcript is the most recently modified `*.jsonl` in the cwd-derived
+project directory under `~/.claude/projects/`, and its last assistant `usage` record yields live
+context directly. Measured 78,573 tokens on a running session this way. The hook payload's
+`transcript_path` field is used when present and the mtime scan is the fallback, so the detector has
+no unverified dependency.
 
 **Live context is `input_tokens + cache_read_input_tokens + cache_creation_input_tokens`** from the
 last assistant `usage` record. Confirmed present on live records.
 
-Behaviour:
-
-- Below the warn threshold: silent. Convention — a hook that prints nothing is free.
-- Between warn and stop: emit a one-line notice with current context and the budget.
-- At or above stop: emit the directive to finish the current task, commit, update the handoff, and
-  stop the loop.
-
-Thresholds live in the plan's ground rules with defaults of **warn 250K, stop 350K**. Rationale:
-well clear of auto-compaction, and above the peak of the cheapest measured session so a short
-effort never trips it. Configurable per effort (story 4). One word from the user overrides a stop
-(story 19) — seam 2, in the loop prompt.
+One word from the user overrides either stop (story 21) — seam 2, in the loop prompt.
 
 ### D3 — Rank 2: `/flow:loop` route B becomes the default continuation path
 
 Route B already spawns one background agent on fresh context; today it is gated behind `.flow/fog`.
-That gate widens: route B is also the path taken when a session stops at the context threshold.
+That gate widens: route B is also the path taken when a session stops at a phase boundary.
 
-Route selection becomes: **A** when starting fresh with no fog and no prior handoff-at-threshold;
-**B** when a fog marker exists, *or* when the handoff records a threshold stop. The successor is
-spawned exactly as route B already does — `subagent_type: general-purpose`,
-`run_in_background: true`, fresh context, never forked (story 8, convention A1). One agent
-continuing the plan, not one per phase (story 9).
+Route selection becomes: **A** when starting fresh with no fog and no completed phase behind it;
+**B** when a fog marker exists, *or* when the handoff records a phase-boundary stop. The successor
+is spawned exactly as route B already does — `subagent_type: general-purpose`,
+`run_in_background: true`, fresh context, never forked (story 10, convention A1).
+
+**One agent at a time, carrying the plan forward.** Each session runs one phase and spawns one
+successor; phases run in sequence, never concurrently. This is the sequential chain, not the
+rejected one-agent-per-phase fan-out — the distinction is that phases here run one after another
+against shared committed state, rather than in parallel against a shared context they cannot see
+(story 11).
 
 The rejection of one-background-agent-per-phase stands and is not reopened. Anthropic's subagents
 documentation places multi-phase shared-context work under *use your main conversation*, and the
@@ -192,28 +255,30 @@ single session. Cited in `research/long-running-claude-code-session-economics.md
 
 **Ordering constraint, carried forward from the prior handoff and still binding:** the handoff must
 be load-bearing *before* sessions become disposable. D2's handoff write and D3's spawn land
-together, or D2 lands first; D3 must not land alone.
+together, or D2 lands first; D3 must not land alone. D2a lands with or before D2, since
+phase-per-session without phase sizing is worse than no change at all.
 
-`templates/loop-prompt.md` gains a threshold-stop clause alongside its existing anatomy (seam 2).
-The successor's spawn reports its agent name (story 20).
+`templates/loop-prompt.md` gains a phase-boundary stop clause alongside its existing anatomy — its
+`If all items are checked, stop the loop` line becomes a two-level stop: end of phase hands off, end
+of plan terminates (seam 2). The successor's spawn reports its agent name (story 22).
 
 ### D4 — Rank 3: output filters
 
-Two filters, both scripts on seam 1, both preserving the full artefact on disk (story 13).
+Two filters, both scripts on seam 1, both preserving the full artefact on disk (story 15).
 
 - **Image reads.** A `Read` of `.png`/`.jpg`/`.jpeg`/`.webp` during a live effort is reduced to
   path, dimensions, and byte size rather than the full payload. Deliberate reads stay available
-  (story 11) — the filter is a default, not a prohibition, and the escape hatch must be documented
+  (story 13) — the filter is a default, not a prohibition, and the escape hatch must be documented
   where it will be found.
 - **Build and test output.** Reduced to failures plus a pass/fail count; the full log is written
   under `.flow/logs/` and referenced by path.
 
-Both are inert when no effort is live (story 18).
+Both are inert when no effort is live (story 20).
 
 ### D5 — Rank 4: model posture, demoted
 
 The plan's ground rules gain an explicit model line for loop iterations. This is now a **1.41×**
-lever, not 2.5×, and the spec says so wherever the number appears (story 15).
+lever, not 2.5×, and the spec says so wherever the number appears (story 17).
 
 The skills already declare `model: sonnet` in frontmatter; the *sessions* did not. This decision is
 about the session and loop-iteration model, not the skill frontmatter, which needs no change.
@@ -227,7 +292,7 @@ defaulting to Sonnet for loop iterations.
 ### D6 — The measurement script becomes a repo artefact
 
 `scripts/measure-sessions.sh` (or a `.py` alongside it) is committed, so the figures in D0 are
-re-derivable in minutes (story 16) and the change can be measured after it lands (story 17). It is
+re-derivable in minutes (story 18) and the change can be measured after it lands (story 19). It is
 a developer tool, not a hook — it never runs automatically and costs nothing when unused.
 
 Re-running it after the effort completes is the acceptance measurement for the whole spec.
@@ -255,10 +320,14 @@ thing.
 **Seam 1 — machine-verified.** Each new script is exercised against a throwaway git repo fixture.
 Cases per script:
 
-- `context-budget.sh`: silent below warn; one-line notice between warn and stop; directive at or
-  above stop; silent exit 0 when `.flow/current` is absent; silent exit 0 when the transcript
-  cannot be located. Fixtures are synthetic `.jsonl` files with a single crafted `usage` record,
-  which makes every threshold case cheap to construct.
+- Phase-boundary detection (D2): given a fixture plan, correctly identifies the last unchecked task
+  in a phase, distinguishes end-of-phase from end-of-plan, and stays silent mid-phase. Edge cases
+  worth fixtures: a phase with every box already ticked, a plan with one phase only, an unchecked
+  task in an *earlier* phase than the current one, and a `## Phase` heading with no tasks under it.
+- `context-budget.sh` (D2b): silent below the backstop; directive at or above it; silent exit 0 when
+  `.flow/current` is absent; silent exit 0 when the transcript cannot be located. Fixtures are
+  synthetic `.jsonl` files with a single crafted `usage` record, which makes every case cheap to
+  construct.
 - The D4 filters: a payload over threshold is summarised, one under it passes through, the full
   artefact exists on disk afterwards, and both are inert with no live effort.
 - `measure-sessions.sh`: run against a synthetic transcript with known token counts and assert the
@@ -270,11 +339,17 @@ is the scripts themselves: `session-state.sh` and `write-handoff-spine.sh` alrea
 "read `.flow/current`, read git, print or mutate" shape these tests assume, so they should be
 retro-fitted with the same fixture tests once the harness exists.
 
-**Seam 2 — human-verified, and named as such.** The loop-prompt threshold clause, the route-B
-widening, the screenshot-discipline wording, and the ground-rules model line are verified by one
-behavioural run of a real route-2 effort that crosses the threshold at least once, plus a read of
+**Seam 2 — human-verified, and named as such.** The loop-prompt two-level stop, the route-B
+widening, D2a's phase sizing, the screenshot-discipline wording, and the ground-rules model line are
+verified by one behavioural run of a real route-2 effort with at least three phases, plus a read of
 the diff. The acceptance evidence is that the effort completes across a chain of sessions with the
-plan file as its only carried state — and D6's script re-run showing the cost actually fell.
+plan file as its only carried state, that no session auto-compacted, and that D6's script re-run
+shows the cost actually fell.
+
+**The sizing check is itself a measurement, not an assertion.** After the behavioural run, D6's
+script reports peak context per session. If phases sized to D2a's five-to-seven target are landing
+well under or well over the ~250–300K knee, the target is wrong and gets corrected in the plan skill
+— the number is a starting estimate from one specimen, not a law.
 
 **Explicitly not tested:** whether the model obeys the prose. That is what the behavioural run and
 `/flow:eyes` are for.
