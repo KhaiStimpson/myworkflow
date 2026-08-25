@@ -65,18 +65,41 @@ skill here uses `context: fork`, and nothing spawns `subagent_type: fork`. A for
 inherits the reasoning that wrote the code and agrees with it; a forked loop re-reads the whole
 transcript on every iteration to learn what the plan file already says.
 
+## One phase, one session
+
+A phase decides how long a session lives. When the loop ticks the last task under a `## Phase`, the
+session commits, updates the handoff and stops; the next phase starts on fresh context, reading the
+plan and the handoff and nothing else.
+
+This is the one rule here that came from measurement rather than from mined habit. Across six
+sessions costing $1,224, **81% of spend was cache reads**. In the worst of them, an iteration cost
+$3–8 while context sat under ~260K and **$17–124 above it** for the same kind of work — and after
+it auto-compacted from 992K down to 89K, iterations went straight back to $5–7. So phases are sized
+to **five to seven tasks**, which is what fits under that knee, and `/flow:plan` enforces it.
+
+Evidence, corrections to an earlier analysis, and the real downsides:
+[`docs/spec-session-economics.md`](docs/spec-session-economics.md). Re-derive the numbers yourself
+with `python scripts/measure-sessions.py`.
+
 ## The hooks
 
-Two rules are enforced by hooks rather than prose, so they hold regardless of which model is
+Some rules are enforced by hooks rather than prose, so they hold regardless of which model is
 driving. Each exits silently when it does not apply — a repo with no live effort pays nothing.
 
 | | When | What it does |
 |---|---|---|
-| **Session state** | session start / resume | Injects the live effort, phase, next unchecked task and branch. Resuming costs no keystrokes. |
-| **Handoff spine** | session end, pre-compact | Writes branch, SHA, phase, next task and dirty files into `HANDOFF-<effort>.md`, between markers. It never touches the prose sections — a hook cannot write "what must not be re-litigated", and `/flow:wrap` still owns those. |
+| **Session state** | session start / resume | Injects the live effort, phase, next unchecked task, branch, and where context sits against its budget. Resuming costs no keystrokes. |
+| **Phase boundary** | end of turn | Detects that the last task in a phase is ticked and says to commit, update the handoff and hand off to a fresh session. The loop prompt runs the same check explicitly; the hook is belt and braces. |
+| **Context backstop** | end of turn | Fires at 400K, which a correctly sized phase never reaches. It exists for the runaway *task* a phase boundary cannot catch — one measured iteration burned 257 turns and $124 on its own. |
+| **Image read guard** | before `Read` | Blocks a large screenshot read and hands back the path and size instead. One measured session spent 96% of everything it observed on 63 image reads. `touch .flow/see` to read one deliberately; the marker is consumed by that read. |
+| **Handoff spine** | session end, pre-compact | Writes branch, SHA, phase, chain position, next task and dirty files into `HANDOFF-<effort>.md`, between markers. It never touches the prose sections — a hook cannot write "what must not be re-litigated", and `/flow:wrap` still owns those. |
+
+`scripts/run-gated.sh` is not a hook but belongs here: wrap your build and test commands in it and a
+green run costs one line instead of a thousand, with the full log on disk and failures shown in
+full.
 
 The scripts are POSIX `sh`. **On Windows they need Git Bash**, which is how Claude Code runs
-hooks there.
+hooks there. `sh tests/run-tests.sh` exercises them against a throwaway fixture.
 
 ## The short version
 

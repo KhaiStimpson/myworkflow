@@ -1,0 +1,9 @@
+# Working state. Decisions get committed; the state of a session in progress does not.
+# HANDOFF files were untracked by absence rather than by rule until now, which was fragile.
+HANDOFF-*.md
+
+# Effort markers, the phase a session owns, and the gated build/test logs.
+.flow/
+
+# Local overrides.
+.claude/settings.local.json
