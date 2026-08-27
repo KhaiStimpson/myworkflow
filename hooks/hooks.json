@@ -10,6 +10,31 @@
       ]
     }
   ],
+  "PreToolUse": [
+    {
+      "matcher": "Read",
+      "hooks": [
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/guard-image-read.sh"]
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/phase-boundary.sh"]
+        },
+        {
+          "type": "command",
+          "command": ["${CLAUDE_PLUGIN_ROOT}/scripts/context-budget.sh"]
+        }
+      ]
+    }
+  ],
   "PreCompact": [
     {
       "hooks": [

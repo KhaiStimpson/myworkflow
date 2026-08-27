@@ -14,10 +14,18 @@ file="HANDOFF-$slug.md"
 plan=$(plan_file "$slug")
 branch=$(git branch --show-current 2>/dev/null || echo unknown)
 sha=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
-phase=$(grep -m1 '^## Phase' "$plan" 2>/dev/null || echo unknown)
+phase=$(current_phase "$plan" 2>/dev/null)
+[ -n "$phase" ] || phase="all phases complete"
 next=$(grep -m1 -- '- \[ \]' "$plan" 2>/dev/null || echo "none - all tasks checked")
 dirty=$(git status --porcelain 2>/dev/null | head -20)
 [ -n "$dirty" ] || dirty="(clean)"
+
+# D2 - which phase this session owned, and where it sits in the chain. Under
+# "one phase, one session" an effort is a sequence of sessions, and a handoff
+# that does not say which link it is leaves the next one guessing.
+owned=$(session_phase 2>/dev/null)
+count=$(cat .flow/session-count 2>/dev/null | tr -d ' \t\r\n')
+case "$count" in ''|*[!0-9]*) count=1 ;; esac
 
 spine=$(
   # Every line goes through '%s\n'. A format string starting with "-" is read as
@@ -26,6 +34,8 @@ spine=$(
   printf 'Updated: %s · Branch: `%s` · Last commit: `%s`\n\n' "$(date -u '+%Y-%m-%d %H:%M UTC')" "$branch" "$sha"
   printf '%s\n' "- **Plan:** ${plan:-none}"
   printf '%s\n' "- **Phase:** $phase"
+  printf '%s\n' "- **This session owned:** ${owned:-not recorded}"
+  printf '%s\n' "- **Session in chain:** $count"
   printf '%s\n' "- **Next task:** $next"
   printf '%s\n\n' "- **Uncommitted:**"
   printf '%s\n%s\n%s\n' '```' "$dirty" '```'

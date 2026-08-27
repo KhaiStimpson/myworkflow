@@ -67,15 +67,41 @@ and the documentation cannot drift apart.
 You never paste it. **`/flow:loop`** fills the template in from the plan — real path, real build
 and test commands, the variants the effort actually needs — and starts the runner:
 
-- **Normally** it hands the prompt to `/loop` in this session, with no interval, so iterations
-  follow the work rather than a timer.
-- **After a fog session** — `.flow/fog` exists, or the fog skill ran earlier in this conversation
-  — it spawns **one background agent on fresh context** instead. The interview's transcript is
-  not worth re-reading every iteration: everything that survived it is already written into the
-  plan, which is the whole reason the plan exists.
+- **On the effort's first session** it hands the prompt to `/loop` here, with no interval, so
+  iterations follow the work rather than a timer.
+- **After a fog session or a completed phase** it spawns **one background agent on fresh context**
+  instead. Neither an interview's transcript nor a finished phase's is worth re-reading every
+  iteration: what survived is already written into the plan, which is the whole reason the plan
+  exists.
 
 The plan file is the state; the loop is stateless. That is why a crashed session costs nothing —
 and why a fresh agent can pick the plan up mid-way with no handover cost.
+
+## One phase, one session
+
+A phase is not a heading. **It is how long a session lives.** When the loop ticks the last task
+under a `## Phase`, `scripts/phase-boundary.sh` says so; the session commits, updates the handoff,
+and stops, and the next phase starts on fresh context.
+
+This is the one change in the flow that was made from measurement rather than from mined habit.
+Across six sessions costing ~$1,116, **81% of spend was cache reads** — paying, over and over, to
+re-read a transcript that had already served its purpose. Segmenting the worst session by iteration
+shows it plainly: while context sat under ~260K an iteration cost $3–8; above it, $17–124 for the
+same kind of work. After that session auto-compacted at 992K and dropped to 89K, iterations went
+straight back to $5–7.
+
+So phases are now **sized to five to seven tasks** — what fits below that knee — and `/flow:plan`
+enforces it. Two things follow that are worth saying out loud:
+
+- **An effort's cost is knowable before it starts.** Four phases means four sessions.
+- **The handoff stops being paperwork.** It is the only thing that crosses a session boundary, so
+  anything a phase learned and did not write down is genuinely gone.
+
+A context backstop at 250K catches what a phase boundary structurally cannot — a single runaway
+task. It should almost never fire; when it does, the phase was sized wrong.
+
+The full evidence, the corrections it made to an earlier analysis, and the downsides are in
+[`docs/spec-session-economics.md`](docs/spec-session-economics.md).
 
 ## Agents here start fresh, never forked
 

@@ -13,7 +13,12 @@ only that one task, following its phase description and the Ground rules section
 Then run <build command> and <test command>. Tick that item [x] in the checklist. Commit
 with a message naming the phase and task. Implement exactly one item per iteration. If the
 task is ambiguous, blocked, or needs a decision I should make, stop and ask instead of
-guessing. Do not skip ahead to a later task. If all items are checked, stop the loop.
+guessing. Do not skip ahead to a later task.
+
+Then run scripts/phase-boundary.sh and do exactly what it says. If it is silent, continue
+to the next task. If it reports a PHASE BOUNDARY, that is the end of this session's work:
+update HANDOFF-<effort>.md, stop the loop, and run /flow:loop so the next phase starts on
+fresh context. If it reports the effort is done, stop and run /flow:wrap.
 ```
 
 | Clause | Why it is there |
@@ -26,7 +31,23 @@ guessing. Do not skip ahead to a later task. If all items are checked, stop the 
 | `Commit naming phase and task` | The history reads as the plan, so a walkthrough is free. |
 | `stop and ask instead of guessing` | The clause that makes unattended running safe. |
 | `Do not skip ahead` | Dependency order is real; a later task built on an unbuilt earlier one is rework. |
-| `If all items are checked, stop` | The loop terminates itself instead of burning turns. |
+| `run scripts/phase-boundary.sh` | **A phase is a session.** The script is the authority on where the boundary is; the prompt does not have to count tasks. |
+| Two-level stop | End of *phase* hands off to a fresh session; end of *plan* terminates and wraps. Collapsing these was the old prompt's blind spot — it only knew how to stop at the very end. |
+
+**Why the loop ends at a phase and not at the end of the plan.** Measured across the corpus, a loop
+iteration costs $3–8 while context sits under ~260K and $17–124 above it. Nothing about the later
+tickets is harder; they are just being done on top of everything that came before. Ending the
+session at the phase boundary and continuing on fresh context puts every task back at the cheap end
+of that curve. `docs/spec-session-economics.md` has the numbers.
+
+`phase-boundary.sh` stops the session on *either* condition: the phase is complete, **or** context
+has crossed the budget mid-phase. The second is what catches a phase that was sized too large — a
+mid-phase stop is not a failure, it just means the handoff has to say the phase is part done and
+name the task to resume from.
+
+A `Stop` hook runs the same check unattended, so a loop that ignores the clause still gets told. It
+speaks on stderr with exit 2, which is what makes a hook's text reach the model at all. The clause
+is the load-bearing path; the hook is belt and braces.
 
 ## Variants worth keeping
 
@@ -44,13 +65,13 @@ After merging, comment on the GitHub issue that it landed, including the merge S
 Do NOT close issues.
 ```
 
-**Add when a fog session came first** — `/flow:loop` spawns a fresh background agent instead of
-looping in the interview's context, and that agent needs the path spelled out:
+**Add for every successor session** — whether it follows a fog interview or a phase boundary, a
+fresh agent needs the path spelled out, because the plan and the handoff are all it gets:
 
 ```
-Read docs/<effort>-plan.md and HANDOFF-<effort>.md first — they carry every decision the
-interview settled, and nothing it did not. Repeat this until every checkbox is ticked,
-then stop.
+Read docs/<effort>-plan.md and HANDOFF-<effort>.md first — they carry every decision that
+has been settled, and nothing that has not. Work only the phase you were handed. Repeat
+until scripts/phase-boundary.sh says the phase is complete, then hand off and stop.
 ```
 
 **Add when the loop is running unattended overnight:**
@@ -68,6 +89,10 @@ question, write the question into the handoff file before stopping.
 - **Looping on top of an interview** — running the loop in the session that just spent a long
   grill resolving the plan re-reads all of it every iteration and buys nothing, because what
   survived is already in the plan file. `/flow:loop` hands that case to a fresh agent.
+- **Running a whole effort in one thread** — the failure this template now guards against. One
+  measured session ran 22 iterations without stopping, climbed to 992K, auto-compacted, and paid
+  up to $124 for a single iteration of ordinary work. The phase boundary exists so that never
+  happens by default.
 - **A plan gone stale against the tree** — when the app changed underneath the plan, re-run
   `/flow:plan` against the current repo before looping again rather than letting the loop
   reconcile it task by task.

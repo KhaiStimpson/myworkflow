@@ -22,7 +22,8 @@ was written is the normal case, not an exception.
 `docs/<effort>-plan.md`. Read `${CLAUDE_PLUGIN_ROOT}/templates/plan.md` and use it as the
 skeleton.
 
-- **Phases** in dependency order, each with a one-line goal you could judge.
+- **Phases** in dependency order, each with a one-line goal you could judge — and **each sized to
+  five to seven tasks**, because a phase is a session. See below.
 - **Tasks as checkboxes**, each one a single sitting's work with an obvious done-state. If a task
   needs two deliverables, it is two tasks.
 - **Ground rules** — the section the loop prompt points at, and the reason the loop stays short.
@@ -33,6 +34,30 @@ skeleton.
 
 **The test posture goes in Ground rules, decided once.** There is no global default — read the
 repo; if it does not answer, **ask once**, and record the answer so the loop never re-asks.
+
+**Wrap the build and test commands in `scripts/run-gated.sh`.** It keeps the full log on disk and
+puts a pass line in context instead of a thousand lines of green output. Failures still show real
+failing lines — the filter never summarises a red run into uselessness.
+
+## Size the phases, because a phase is a session
+
+A phase now decides how long a session lives: `/flow:loop` ends the session when the last task in a
+phase is ticked and continues the next phase on fresh context. So phase size is no longer a matter
+of taste.
+
+**Target five to seven tasks per phase.** That number is measured, not guessed. In the corpus, a
+loop iteration costs $3–8 while context is under ~260K and $17–124 above it, and five to seven
+tasks is what fits below that knee. The evidence is in `docs/spec-session-economics.md`.
+
+- **Where dependency order and sizing conflict, dependency wins.** Split the oversized phase at its
+  least-coupled seam into `Phase 3a` / `Phase 3b` rather than reordering work that cannot move.
+- **A phase you cannot get under the ceiling is a finding, not a failure.** Say so in the plan when
+  you write it, so it is known before it costs anything rather than discovered mid-loop.
+- **Do not pad.** A genuinely three-task phase stays three tasks; inventing filler to hit a number
+  is worse than a short session.
+
+Say how many sessions the effort will take when you present the plan. That number is the point:
+the cost is knowable before the work starts.
 
 ## Record the effort, so the rest of the flow can find it
 

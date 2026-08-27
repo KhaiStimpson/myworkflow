@@ -19,6 +19,9 @@ to start that engine correctly — **not** to implement a task itself.
 - Remaining: !`grep -hc -- '- \[ \]' docs/*-plan.md 2>/dev/null || echo 0`
 - Fog marker: !`cat .flow/fog 2>/dev/null || echo none`
 - Handoff: !`ls HANDOFF-*.md 2>/dev/null || echo none`
+- Phase this session owns: !`cat .flow/phase 2>/dev/null || echo none`
+- Handoff pending: !`cat .flow/handoff-pending 2>/dev/null || echo none`
+- Phase of the next task: !`awk '/^## Phase/{h=$0} /^[[:space:]]*- \[ \]/{if(h!="")print h; exit}' docs/*-plan.md 2>/dev/null || echo none`
 
 Requested interval: **$ARGUMENTS** — empty means let the runner self-pace, which is what
 implementation work wants.
@@ -56,9 +59,10 @@ engine drift apart, and the template is the one place the anatomy lives.
 
 ## Pick the runner
 
-Two runners, and the fog marker decides between them.
+Two runners. **Fresh context is the default; looping here is the exception** — take route A only
+when this conversation has nothing worth escaping.
 
-### A — no fog before this: loop in this session
+### A — a clean start: loop in this session
 
 Invoke the **bundled** `loop` skill — the one named `loop`, not this one — with the interval
 first and the filled-in prompt after it:
@@ -70,27 +74,41 @@ first and the filled-in prompt after it:
 Omit the interval unless `$ARGUMENTS` gave one. Implementation iterations should follow each
 other as fast as the work allows, not sit on a timer.
 
-### B — fog came first: spawn a fresh background agent
+Take this route only when **both** are true: the fog marker is `none` and no fog skill ran in this
+conversation, **and** the handoff records no completed phase. That means this is the effort's first
+session and there is nothing behind you worth leaving.
 
-If the fog marker above is anything but `none`, or the fog skill ran earlier in **this**
-conversation, do not loop here. This conversation is carrying an interview — every branch that
-was resolved, every option that was rejected — and re-reading all of it on every iteration buys
-nothing, because the decisions that survived it are already written into the plan.
+### B — spawn a fresh background agent
 
-Instead **spawn one background agent on fresh context** with the Agent tool:
+Take this route when **either** is true:
+
+- **A fog session came first** — the marker above is anything but `none`, or the fog skill ran
+  earlier in this conversation. This conversation is carrying an interview, and re-reading every
+  resolved branch on every iteration buys nothing: what survived is already in the plan.
+- **A phase boundary ended the last session** — the *handoff pending* line above is anything but
+  `none`, the handoff records a completed phase, or `scripts/phase-boundary.sh` reported one in
+  this conversation. The previous phase's transcript is
+  spent; its conclusions are in the plan and the handoff.
+
+Either way, **spawn one background agent on fresh context** with the Agent tool:
 
 - `subagent_type: general-purpose`
 - `run_in_background: true`
-- prompt: the filled-in loop prompt, plus the plan path, plus
-  `Repeat this until every checkbox in the plan is ticked, then stop.`
+- prompt: the filled-in loop prompt, plus the plan path and the handoff path, plus the successor
+  variant from the template — work this phase only, hand off at its boundary.
 
-It starts cold and reads the plan, which is the point — the plan and the handoff carry everything
-the interview settled, and nothing it did not.
+It starts cold and reads the plan, which is the point.
 
 Then report the agent's name in one line, say the plan file is where progress shows, and stop.
 Do not shadow it by starting a second loop here.
 
-**Announce which runner you picked and why, in one line.** The user overrides it with a word.
+**One agent at a time.** Each session runs one phase and spawns one successor. Phases run in
+sequence against committed state — never two agents on the plan at once. That is the difference
+between this and the fan-out topology the research rejected, and it is not a detail: two agents
+sharing a plan file will tick each other's boxes.
+
+**Announce which runner you picked and why, in one line.** The user overrides it with a word — if
+they say to carry on in this session, do that and say what it will cost.
 
 ## Subagents here start fresh, never forked
 
@@ -107,7 +125,9 @@ already believed rather than an independent read.
   the clause the whole unattended posture rests on; it must survive into the prompt verbatim.
 - **The tick is the progress record.** An iteration that implements without ticking makes the
   next one repeat the work.
-- **The loop terminates itself** when every box is checked. Then `wrap` runs, not another loop.
+- **The loop stops at two levels.** End of *phase* — hand off to a fresh session. End of *plan* —
+  terminate, and `wrap` runs, not another loop. `scripts/phase-boundary.sh` tells the loop which
+  of the two it has reached, so nobody has to count tasks.
 
 ## Never hand back a command
 

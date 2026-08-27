@@ -1,0 +1,5 @@
+# The hook scripts run under Git Bash on Windows. A CRLF checkout puts \r on the
+# end of the shebang and every command, and the whole plugin fails with errors
+# that name the right line and explain nothing. Force LF regardless of platform.
+*.sh text eol=lf
+*.py text eol=lf
