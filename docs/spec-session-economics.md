@@ -112,24 +112,48 @@ Re-derivation on 2026-08-26 confirmed every measurement and refuted two derived 
 subagents across all six sessions, and the 998K → auto-compact → 275K climb in `4c15e762`.
 
 **Refuted — model attribution.** The table labelled "Cost as run (Opus 5)" is wrong twice. The
-Opus sessions ran on `claude-opus-4-8`, not Opus 5. And three of the six already ran on
-`claude-sonnet-5` but were priced at Opus rates:
+Opus sessions ran on `claude-opus-4-8`, not Opus 5 (same rates, so the cost stands). And three of
+the six already ran on `claude-sonnet-5` but were priced at Opus rates.
 
-| Session | Model actually used | Actual | As previously stated |
-|---|---|---|---|
-| andrew-crm `4c15e762` | claude-opus-4-8 | $427 | $427 |
-| andrew-crm `eff1e858` | claude-opus-4-8 (+22 sonnet) | $373 | $378 |
-| dump-debugger `ef33c968` | **claude-sonnet-5** | $162 | $270 |
-| sqlviewer `aa0efe15` | **claude-sonnet-5** | $83 | $138 |
-| sqlviewer `54a4e45c` | **claude-sonnet-5** | $78 | $130 |
-| andrew-crm `68f43899` | claude-opus-4-8 | $101 | $101 |
-| **Total** | | **$1,224** | $1,444 |
+**Corrected 2026-08-27 — the Sonnet rate used here was itself wrong.** An earlier revision of this
+section priced Sonnet 5 at $3.00/$3.75/$0.30/$15.00. Those are **Sonnet 4.6** rates. Sonnet 5 is
+**$2.00/$2.50/$0.20/$10.00**, which `docs/session-economics-findings.md` had right before this spec
+"corrected" it. `scripts/measure-sessions.py` carried the wrong row and now asserts the
+cache-write/cache-read ratios so it cannot drift again.
 
-**Refuted — the savings model.** Opus and Sonnet 5 differ by a flat 1.67× on every token class
-(input 5/3, cache write 6.25/3.75, cache read 0.5/0.3, output 25/15), not 2.5×. Because half the
-corpus was already Sonnet, the realizable multiplier from a model switch is **1.41×**. Combined
-with splitting at 1.9×, the estimate falls from **4.7× ($1,444 → $307)** to **≈2.7×
-($1,224 → $457)**.
+| Session | Model actually used | Actual | Was stated here | Original findings |
+|---|---|---|---|---|
+| andrew-crm `4c15e762` | claude-opus-4-8 | $427 | $427 | $427 |
+| andrew-crm `eff1e858` | claude-opus-4-8 (+22 sonnet) | ~$373 | $373 | $378 |
+| dump-debugger `ef33c968` | **claude-sonnet-5** | **~$108** | $162 | $270 |
+| sqlviewer `aa0efe15` | **claude-sonnet-5** | **~$55** | $83 | $138 |
+| sqlviewer `54a4e45c` | **claude-sonnet-5** | **~$52** | $78 | $130 |
+| andrew-crm `68f43899` | claude-opus-4-8 | $101 | $101 | $101 |
+| **Total** | | **≈$1,116** | $1,224 | $1,444 |
+
+The Sonnet rows are the previously stated figures rescaled by 2/3; they are marked approximate
+because they were **not** re-derived from the transcripts. Re-run `scripts/measure-sessions.py`
+against the corpus to replace them with measured numbers — that is what the script is committed
+for, and this table should not be quoted as settled until someone has.
+
+**Restored — the savings model.** Opus and Sonnet 5 differ by a **flat 2.5× on every token class**
+(input 5/2, cache write 6.25/2.50, cache read 0.50/0.20, output 25/10). The claim of 1.67× was an
+artefact of the wrong rate row. Because half the corpus was already Sonnet, the realizable
+multiplier from a model switch across *this* corpus is **≈1.9×**: the Opus portion is ~$901 of the
+~$1,116, and moving it to Sonnet 5 takes the total to **≈$575** — within $2 of the $577 the
+original findings predicted.
+
+**This does NOT re-rank the work the way the previous revision claimed.** Splitting (≈1.9×) and the
+model switch (≈1.9×) are comparable levers, and they multiply. The difference between them is cost
+of adoption, not size of prize:
+
+- **The model switch is one setting and no workflow change.** It should be taken first and
+  independently of this spec, because it is the cheapest 2× available and nothing here blocks it.
+- **Splitting is the structural lever** and the only one that also fixes context rot, unbounded
+  session growth, and the $124-per-iteration tail. It is what the rest of this document builds.
+
+Neither supersedes the other. The honest combined estimate is **≈$1,116 → ≈$300**, and it stays an
+estimate until the measurement is re-run.
 
 **This re-ranks the work.** Splitting is the dominant lever and the model switch is the minor one —
 the reverse of the prior ordering. The ranks below are renumbered accordingly.
@@ -215,10 +239,25 @@ check survives, as a safety net rather than as the trigger.
 - At or above it: emit the directive to finish the current task, commit, update the handoff, and
   stop the loop — the same stop D2 performs, fired early and out of band.
 
-Backstop default **400K**, overridable in the plan's ground rules. Deliberately set above the knee
+Backstop default **250K**, overridable in the plan's ground rules. Set AT the measured knee
 and above the peak of the cheapest measured session: it should almost never fire, and a session that
 trips it is evidence that D2a's sizing was wrong for that phase, which is worth surfacing in the
 handoff.
+
+**Hook exit codes are load-bearing, and the first revision got them wrong.** Both Stop hooks
+printed their directive to stdout and exited 0. For a `Stop` hook that goes to the transcript only —
+the model never sees it, so the "belt and braces" backstop was inert and the prose in the loop
+prompt was the *only* path. Directives now go to **stderr with exit 2**, the contract that blocks the
+stop and feeds the text back as an instruction. Each exit-2 path is guarded by a marker
+(`.flow/handoff-pending`, `.flow/over-budget`, `.flow/wrap-pending`) so the second pass falls through
+and a session can still end; `session-state.sh` clears the per-session ones at startup.
+
+**The phase boundary now also checks context, so it no longer depends on the sizing guess.**
+`phase-boundary.sh` fires on *either* the last task in a phase being ticked *or* live context
+crossing the budget mid-phase. Phase sizing is a human guess made at the point of least information
+and it was previously load-bearing on its own; this makes a wrong guess self-correcting rather than
+expensive. A mid-phase stop tells the handoff to record the phase as PART DONE and name the task the
+successor resumes from.
 
 **Locating the transcript is solved and does not depend on `transcript_path`.** Verified locally on
 2026-08-26: the live session's transcript is the most recently modified `*.jsonl` in the cwd-derived
@@ -275,10 +314,15 @@ Two filters, both scripts on seam 1, both preserving the full artefact on disk (
 
 Both are inert when no effort is live (story 20).
 
-### D5 — Rank 4: model posture, demoted
+### D5 — Model posture, and it is not a minor lever
 
-The plan's ground rules gain an explicit model line for loop iterations. This is now a **1.41×**
-lever, not 2.5×, and the spec says so wherever the number appears (story 17).
+The plan's ground rules gain an explicit model line for loop iterations. Opus → Sonnet 5 is a flat
+**2.5×** on every token class, worth **≈1.9×** across a corpus that was already half Sonnet — the
+same order as splitting, for the price of one setting. An earlier revision demoted this to 1.41×
+on a wrong rate row; see "Restored — the savings model" above (story 17).
+
+**Take it independently of everything else in this spec.** It needs no workflow change, and it
+composes with splitting rather than competing with it.
 
 The skills already declare `model: sonnet` in frontmatter; the *sessions* did not. This decision is
 about the session and loop-iteration model, not the skill frontmatter, which needs no change.

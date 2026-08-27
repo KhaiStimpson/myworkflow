@@ -109,6 +109,53 @@ ok "$(says "$out" "wrap")" "end of plan sends you to wrap, not to a successor" "
 ok "$(says "$out" "Do NOT spawn")" "end of plan explicitly forbids spawning" "$out"
 teardown
 
+fixture; plan_with ""
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+plan_with "p1t1 p1t2"
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 2 ] && echo yes || echo no)" "a boundary exits 2 - stdout on exit 0 never reaches the model" "$code"
+teardown
+
+fixture; plan_with ""
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+plan_with "p1t1 p1t2"
+out=$(sh "$ROOT/scripts/phase-boundary.sh" 2>/dev/null)
+ok "$(empty "$out")" "the directive goes to stderr, not stdout" "$out"
+teardown
+
+fixture; plan_with ""
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+plan_with "p1t1 p1t2"
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 0 ] && echo yes || echo no)" "the second pass exits 0 so the session can actually end" "$code"
+teardown
+
+fixture; plan_with "p1t1 p1t2 p2t1 p2t2"
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 2 ] && echo yes || echo no)" "end of plan exits 2 as well" "$code"
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 0 ] && echo yes || echo no)" "end of plan does not block a second time" "$code"
+teardown
+
+# The context boundary: mid-phase, over budget, the session still ends.
+fixture; plan_with ""; transcript_with 500000
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+plan_with "p1t1"
+out=$(sh "$ROOT/scripts/phase-boundary.sh" 2>&1); code=$?
+ok "$(says "$out" "CONTEXT BOUNDARY")" "fires mid-phase when context crosses the budget" "$out"
+ok "$([ "$code" -eq 2 ] && echo yes || echo no)" "the context boundary exits 2" "$code"
+ok "$(says "$out" "PART DONE")" "tells the handoff the phase is unfinished" "$out"
+ok "$([ -f .flow/handoff-pending ] && echo yes || echo no)" "leaves the pending marker for /flow:loop"
+teardown
+
+fixture; plan_with ""; transcript_with 50000
+sh "$ROOT/scripts/phase-boundary.sh" >/dev/null 2>&1
+plan_with "p1t1"
+out=$(sh "$ROOT/scripts/phase-boundary.sh" 2>&1)
+ok "$(empty "$out")" "silent mid-phase when context is under the budget" "$out"
+teardown
+
 fixture; plan_with "p1t1 p1t2"
 printf '## Phase 9 — gone\n' > .flow/phase
 out=$(sh "$ROOT/scripts/phase-boundary.sh" 2>&1)
@@ -146,6 +193,33 @@ fixture; plan_with ""; transcript_with 500000
 out=$(sh "$ROOT/scripts/context-budget.sh" 2>&1)
 ok "$(says "$out" "CONTEXT BACKSTOP")" "fires above the backstop" "$out"
 ok "$(says "$out" "sized wrong")" "says the phase was mis-sized, not just that context is big" "$out"
+teardown
+
+fixture; plan_with ""; transcript_with 500000
+sh "$ROOT/scripts/context-budget.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 2 ] && echo yes || echo no)" "the backstop exits 2 so the model is actually told" "$code"
+sh "$ROOT/scripts/context-budget.sh" >/dev/null 2>&1; code=$?
+ok "$([ "$code" -eq 0 ] && echo yes || echo no)" "it fires once per session, never blocking the stop forever" "$code"
+teardown
+
+fixture; plan_with ""; transcript_with 500000
+out=$(sh "$ROOT/scripts/context-budget.sh" 2>/dev/null)
+ok "$(empty "$out")" "the backstop writes to stderr, not stdout" "$out"
+teardown
+
+# 250K is the default, and it is what an unset ground rule resolves to.
+fixture
+printf '# Demo\n\n## Phase 1 — first\n\n- [ ] task 1\n' > docs/demo-plan.md
+transcript_with 260000
+out=$(sh "$ROOT/scripts/context-budget.sh" 2>&1)
+ok "$(says "$out" "CONTEXT BACKSTOP")" "the default backstop is 250K, not 400K" "$out"
+teardown
+
+fixture
+printf '# Demo\n\n## Phase 1 — first\n\n- [ ] task 1\n' > docs/demo-plan.md
+transcript_with 240000
+out=$(sh "$ROOT/scripts/context-budget.sh" 2>&1)
+ok "$(empty "$out")" "and it is silent just below 250K" "$out"
 teardown
 
 fixture; plan_with ""; transcript_with 500000

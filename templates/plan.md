@@ -16,7 +16,7 @@ this section.
   gate.** Decided once, recorded here, never re-asked mid-loop.
 - **Model:** `sonnet` for loop iterations unless this effort needs otherwise. Recorded so the cost
   posture is a decision, not whatever was selected that day.
-- **Context backstop:** `400000` — the safety net, not the trigger. Phases end sessions; this
+- **Context backstop:** `250000` — the safety net, not the trigger. Phases end sessions; this
   catches a runaway task. A session that trips it means a phase was sized wrong.
 - **Branching:** ticket branches off `integration/<effort>`, merged back `--no-ff`. Nothing
   reaches `dev` until the whole effort is reviewed.

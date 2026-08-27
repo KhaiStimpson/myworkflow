@@ -40,7 +40,13 @@ tickets is harder; they are just being done on top of everything that came befor
 session at the phase boundary and continuing on fresh context puts every task back at the cheap end
 of that curve. `docs/spec-session-economics.md` has the numbers.
 
-A hook runs the same check unattended, so a loop that ignores the clause still gets told. The clause
+`phase-boundary.sh` stops the session on *either* condition: the phase is complete, **or** context
+has crossed the budget mid-phase. The second is what catches a phase that was sized too large — a
+mid-phase stop is not a failure, it just means the handoff has to say the phase is part done and
+name the task to resume from.
+
+A `Stop` hook runs the same check unattended, so a loop that ignores the clause still gets told. It
+speaks on stderr with exit 2, which is what makes a hook's text reach the model at all. The clause
 is the load-bearing path; the hook is belt and braces.
 
 ## Variants worth keeping

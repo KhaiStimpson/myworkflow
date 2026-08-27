@@ -84,7 +84,7 @@ under a `## Phase`, `scripts/phase-boundary.sh` says so; the session commits, up
 and stops, and the next phase starts on fresh context.
 
 This is the one change in the flow that was made from measurement rather than from mined habit.
-Across six sessions costing $1,224, **81% of spend was cache reads** — paying, over and over, to
+Across six sessions costing ~$1,116, **81% of spend was cache reads** — paying, over and over, to
 re-read a transcript that had already served its purpose. Segmenting the worst session by iteration
 shows it plainly: while context sat under ~260K an iteration cost $3–8; above it, $17–124 for the
 same kind of work. After that session auto-compacted at 992K and dropped to 89K, iterations went
@@ -97,7 +97,7 @@ enforces it. Two things follow that are worth saying out loud:
 - **The handoff stops being paperwork.** It is the only thing that crosses a session boundary, so
   anything a phase learned and did not write down is genuinely gone.
 
-A context backstop at 400K catches what a phase boundary structurally cannot — a single runaway
+A context backstop at 250K catches what a phase boundary structurally cannot — a single runaway
 task. It should almost never fire; when it does, the phase was sized wrong.
 
 The full evidence, the corrections it made to an earlier analysis, and the downsides are in

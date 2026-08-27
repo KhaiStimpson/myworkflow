@@ -22,14 +22,41 @@ import os
 import sys
 
 # Published per-million-token rates: input, cache write, cache read, output.
+# Cache write is 1.25x input and cache read is 0.10x input on every model, so a
+# row that does not hold that ratio is a typo. Checked against the published
+# rates 2026-08-27.
 RATES = {
-    "opus":   (5.00, 6.25, 0.50, 25.00),
-    "sonnet": (3.00, 3.75, 0.30, 15.00),
+    "opus":   (5.00, 6.25, 0.50, 25.00),   # Opus 5, and Opus 4.8/4.7/4.6
+    "sonnet": (2.00, 2.50, 0.20, 10.00),   # Sonnet 5
+    "sonnet46": (3.00, 3.75, 0.30, 15.00), # Sonnet 4.6 - the older, dearer tier
+    "haiku":  (1.00, 1.25, 0.10, 5.00),    # Haiku 4.5
 }
 
 
+# The ratio check as an assertion, not just a comment. This file has already
+# carried one wrong row (Sonnet 4.6 rates used for Sonnet 5, which understated
+# the Opus/Sonnet gap as 1.67x when it is a flat 2.5x); it should not do so
+# again silently.
+for _name, (_in, _cw, _cr, _out) in RATES.items():
+    assert abs(_cw - _in * 1.25) < 1e-9, f"{_name}: cache write is not 1.25x input"
+    assert abs(_cr - _in * 0.10) < 1e-9, f"{_name}: cache read is not 0.10x input"
+
+
 def family(model):
-    return "sonnet" if "sonnet" in (model or "") else "opus"
+    """Map a model id onto a rate row.
+
+    Order matters: the sonnet-4-6 test has to precede the generic sonnet one.
+    Anything unrecognised falls through to opus, which over-states rather than
+    under-states - a cost report that flatters the bill is the worse failure.
+    """
+    m = model or ""
+    if "haiku" in m:
+        return "haiku"
+    if "sonnet-4-6" in m or "sonnet-4.6" in m:
+        return "sonnet46"
+    if "sonnet" in m:
+        return "sonnet"
+    return "opus"
 
 
 def cost(usage, fam):

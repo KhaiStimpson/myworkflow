@@ -76,6 +76,36 @@ live_context() {
   echo $(( ${_i:-0} + ${_r:-0} + ${_c:-0} ))
 }
 
+# ---------------------------------------------------------------------------
+# The context budget, shared by context-budget.sh (the hook backstop) and
+# phase-boundary.sh (the path the loop prompt actually walks). Both need the
+# same number, and a threshold that lives in two files drifts.
+#
+# Default 250K, which is where the measured cost knee is. The earlier 400K sat
+# ABOVE the knee, so by the time it fired the expensive turns were already paid
+# for - and above a typical `/autocompact 300k`, so it could never fire at all.
+# ---------------------------------------------------------------------------
+context_limit() {
+  _l=$(ground_rule "$1" 'Context backstop')
+  case "$_l" in
+    ''|*[!0-9]*) _l=250000 ;;
+  esac
+  printf '%s' "$_l"
+}
+
+# Echoes "<ctx> <limit>" and returns 0 when context is at or over budget.
+# Returns 1 when it is under, or when the transcript cannot be read - this is
+# advisory, and it must never be an obstacle when it cannot see.
+context_over_budget() {
+  _lim=$(context_limit "$1")
+  _t=$(transcript_file "$CLAUDE_TRANSCRIPT_PATH") || return 1
+  [ -n "$_t" ] || return 1
+  _ctx=$(live_context "$_t") || return 1
+  [ -n "$_ctx" ] || return 1
+  [ "$_ctx" -lt "$_lim" ] && return 1
+  printf '%s %s' "$_ctx" "$_lim"
+}
+
 # A "- **Key:** value" line from the plan's Ground rules, or empty.
 ground_rule() {
   [ -f "$1" ] || return 1

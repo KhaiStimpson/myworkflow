@@ -35,6 +35,10 @@ printf '  next:     %s\n' "$next"
 # This is also where a handed-off phase gets picked up: the predecessor left the
 # pending marker deliberately un-cleared so its own handoff could name the phase
 # it finished. Claiming here is what advances the chain.
+# The one-shot markers the Stop hooks use to avoid blocking a session forever are
+# per-session state. A fresh session gets a fresh chance to be told.
+rm -f .flow/over-budget .flow/wrap-pending
+
 cur=$(current_phase "$plan" 2>/dev/null)
 if [ -n "$cur" ]; then
   set_session_phase "$cur"
@@ -48,8 +52,7 @@ fi
 # D2b - the budget, in front of you while the work happens instead of on a bill
 # afterwards. Silent when the transcript cannot be read; this is information,
 # never an obstacle.
-limit=$(ground_rule "$plan" 'Context backstop')
-case "$limit" in ''|*[!0-9]*) limit=400000 ;; esac
+limit=$(context_limit "$plan")
 t=$(transcript_file "$CLAUDE_TRANSCRIPT_PATH" 2>/dev/null)
 if [ -n "$t" ]; then
   ctx=$(live_context "$t" 2>/dev/null)
