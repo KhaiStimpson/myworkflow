@@ -17,6 +17,10 @@ Read the code before writing phases. If a plan already exists for this effort, r
 the current tree and say plainly what has drifted — the base app being finished after the plan
 was written is the normal case, not an exception.
 
+If `.flow/explore-grill` exists, read it — a brainstorm was grilled into this plan, and its
+resolved questions are decisions already made. Carry them into Ground rules so the loop does not
+re-open them.
+
 ## The file
 
 `docs/<effort>-plan.md`. Read `${CLAUDE_PLUGIN_ROOT}/templates/plan.md` and use it as the

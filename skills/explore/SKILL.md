@@ -33,6 +33,11 @@ of chat text.
 - **Group into a small number of themes** so the whole thing is skimmable, with depth underneath.
 - **End with a recommendation**: a shortlist, in order, with the reason for the ordering and the
   cheapest thing worth doing first.
+- **Red-team it before publishing.** Spawn one fresh subagent — not a fork — with the draft
+  shortlist and its reasoning, and ask where it is thin: which cost line is optimistic, which
+  idea is framed to win, what a skeptical reader would push on. Fold what survives into a short
+  **Pressure-tested** note on the artifact. The pass costs the reader nothing and catches what a
+  batched question round cannot.
 
 ## Ask, but batch
 
@@ -40,8 +45,20 @@ If a question would materially change the ideas, ask — but collect every quest
 round rather than dripping them out. Long interrogations get abandoned, and an abandoned
 brainstorm leaves nothing behind.
 
+## Grill the pick before it becomes a plan
+
+Once the artifact is published and the user leans toward a shortlist, that shortlist is about to
+turn into `plan` phases — so grill it first. Invoke `${user_config.fog_skill}` on the chosen
+direction, bounded: a few questions on that one target, not a walk down every branch, and stop
+when the direction holds up or the user tires. **Invoke means invoke** — call the skill yourself
+with the Skill tool; never hand the user a `/flow:*` command to type instead.
+
+Log each resolved question and its answer to `.flow/explore-grill` as you go, creating the
+directory if needed. That keeps the round abandonable without loss, and `plan` reads the file so
+the grilling is not repeated.
+
 ## The handoff
 
-When the ideas are chosen, the next step is `plan` — the picked ideas become the phases. Say that
-in one line and invoke it when the user picks. Do not start planning inside this skill, and do
-not start implementing at all.
+When the pick has been grilled and holds, the next step is `plan` — the chosen ideas become the
+phases, and the `.flow/explore-grill` notes carry across with them. Say that in one line and
+invoke `plan`. Do not start planning inside this skill, and do not start implementing at all.

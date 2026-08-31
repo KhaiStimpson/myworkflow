@@ -36,7 +36,8 @@ If it cannot, the handoff is not finished.
 5. **Make the repo present itself**: a real `.gitignore`, and a `README.md` about the app — what
    it does, screenshots from `docs/screenshots/`, and any badge the project uses. A repo without
    this is not finished, it is just merged.
-6. **Delete the handoff file**, and clear the effort markers — `.flow/current` and `.flow/fog`.
+6. **Delete the handoff file**, and clear the effort markers — `.flow/current`, `.flow/fog`, and
+   `.flow/explore-grill` if it is there.
    Their state now lives in the PR, and a stale marker sends the next `/flow:loop` at an effort
    that is already finished.
 
