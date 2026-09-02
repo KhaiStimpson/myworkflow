@@ -33,6 +33,10 @@ Two things ride **alongside** any route, not inside it:
 
 - **Design** — if more than one defensible visual answer exists, `/flow:design` runs first and
   produces an HTML artifact with three variants before a line of product code is written.
+  `/flow:explore` evaluates the same axis before it publishes: when a brainstorm is about a
+  screen, the design pass runs on the direction being recommended and the variants land as a
+  section of the options artifact rather than a page of their own — one link, ideas and mockups
+  together.
 - **Fog** — route 3 hands off to a configured skill, by default
   [`grill-me`](https://github.com/mattpocock/skills) from Matt Pocock's skills (MIT), which
   interviews a plan until every branch resolves. Swap it for `wayfinder` in the plugin's settings

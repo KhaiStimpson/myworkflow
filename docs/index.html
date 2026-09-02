@@ -204,7 +204,7 @@ footer p{max-width:70ch}
 
   <div class="hero">
     <div>
-      <p class="eyebrow">Claude Code plugin · flow v0.4.1</p>
+      <p class="eyebrow">Claude Code plugin · flow v0.5.0</p>
       <h1>Route the work <em>before</em> you do it.</h1>
       <p class="lede">Most agent workflows start typing immediately. <b>flow</b> reads the task first,
       announces one of four routes in three lines, and then runs that route end to end — plan in
@@ -330,6 +330,11 @@ the design pass, or `0` to just do it.</span></pre>
       returns three variants at both breakpoints. <b>Research</b> — any load-bearing external fact
       goes to a background <code>researcher</code> agent that writes a cited file and never blocks
       the turn.</p>
+      <p class="note"><b>A brainstorm about a screen evaluates that same design axis.</b>
+      <code>/flow:explore</code> runs the design pass on the direction it is about to recommend,
+      before it publishes, and the variants land as a section of the options artifact rather than
+      a page of their own. One link carries the ideas, the recommendation and the mockups — an
+      idea about a screen is not readable until someone has seen the screen.</p>
     </div>
   </section>
 
@@ -576,7 +581,7 @@ and start the next phase on fresh context.</pre>
               <tr><td><code>/flow</code></td><td><b>Macro.</b> Front door — routes the task, then runs the route end to end.</td></tr>
               <tr><td><code>/flow:loop</code></td><td><b>Macro.</b> Fills the loop prompt in from the plan and starts the runner.</td></tr>
               <tr><td><code>/flow:start</code></td><td>Investigates, announces a route in three lines, one-token veto.</td></tr>
-              <tr><td><code>/flow:explore</code></td><td>Brainstorm with zero file changes → options with a recommendation.</td></tr>
+              <tr><td><code>/flow:explore</code></td><td>Brainstorm with zero file changes → options with a recommendation, plus design variants on the same page when the idea is visual.</td></tr>
               <tr><td><code>/flow:design</code></td><td>Three variants, desktop + mobile → a decisions record that outranks the mockup.</td></tr>
               <tr><td><code>/flow:plan</code></td><td>Phased checkbox plan plus the loop prompt that executes it. Implements nothing.</td></tr>
               <tr><td><code>/flow:work</code></td><td>One slice, one branch, verify, screenshot, land on the integration branch.</td></tr>
