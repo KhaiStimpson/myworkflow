@@ -50,7 +50,7 @@ Two you need to remember. Seven more underneath, for when you want to drive one 
 | | |
 |---|---|
 | `/flow:start` | Investigates, announces a route in three lines, one-token veto. |
-| `/flow:explore` | Brainstorm with zero file changes → artifact of options with a recommendation. |
+| `/flow:explore` | Brainstorm with zero file changes → artifact of options with a recommendation, with design variants folded into the same page when the idea is visual. |
 | `/flow:design` | Three variants, desktop + mobile, one HTML artifact → a decisions record that outranks the mockup. |
 | `/flow:plan` | Phased checkbox plan in `docs/` **plus the loop prompt that executes it**. Implements nothing. |
 | `/flow:work` | One slice, one branch, verify, screenshot, land on the integration branch. |

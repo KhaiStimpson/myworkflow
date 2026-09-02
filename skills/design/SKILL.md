@@ -43,6 +43,24 @@ chased across rounds, and republished to that same URL every round.
 Iterate inside the artifact. Mixing is normal — "the action bar from B with the docked panel from
 C" is a legitimate answer, so keep the variants decomposable.
 
+## When `explore` invoked this
+
+A brainstorm runs this pass on the direction it is about to recommend, before it publishes. Two
+things change, and only these two:
+
+- **The artifact is theirs.** Publish the variants as a section of the explore artifact at the
+  URL you were handed, below the options and the recommendation — not a new page. The stable-URL
+  rule is unchanged; that URL is simply the stable one. Everything else about the artifact still
+  applies: three variants, both breakpoints, a recommendation with its cost line.
+- **The record waits.** Nothing has been approved yet and there is no effort slug, so do not
+  write `docs/design/<effort>.md`. Say in one line that the record is pending approval. If the
+  user approves a direction there and then, write it — under the effort slug if `plan` has
+  produced one, and under the explore topic if it has not.
+
+The preflight is unchanged. Extraction still happens in a subagent, and "zero unresolved local
+references" is still the success test — a brainstorm is a worse place to ship an approximate
+artifact, not a better one, because it is the mockup that sells the idea.
+
 ## The decision record outranks the mockup
 
 When a direction is approved, write `docs/design/<effort>.md` **before any implementation**:
