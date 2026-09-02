@@ -1,5 +1,7 @@
 # myworkflow
 
+[github.com/KhaiStimpson/myworkflow](https://github.com/KhaiStimpson/myworkflow)
+
 Your working loop, packaged as a Claude Code plugin — derived from ~40 of your sessions across
 `andrew-crm`, `sqlviewer`, `dump-debugger`, `hanger` and `worker`, not invented.
 
