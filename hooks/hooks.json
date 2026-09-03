@@ -6,9 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/session-state.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/session-state.sh"
           }
         ]
       }
@@ -19,9 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/guard-image-read.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/guard-image-read.sh"
           }
         ]
       }
@@ -31,15 +27,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/phase-boundary.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/phase-boundary.sh"
           },
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/context-budget.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/context-budget.sh"
           }
         ]
       }
@@ -49,9 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"
           }
         ]
       }
@@ -61,9 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": [
-              "${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"
-            ]
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/write-handoff-spine.sh"
           }
         ]
       }
