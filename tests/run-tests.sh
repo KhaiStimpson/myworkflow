@@ -379,5 +379,26 @@ done
 ok "$([ -x "$ROOT/scripts/run-gated.sh" ] && echo yes || echo no)" "scripts/run-gated.sh is executable"
 
 # ---------------------------------------------------------------------------
+echo "the skills' inline shell"
+# ---------------------------------------------------------------------------
+
+# A skill's !`...` snippets are expanded by the harness before the shell sees
+# them, and two of those rewrites bite silently.
+#
+# $0..$9 are the slash command's own arguments: `/flow:loop @docs/x-plan.md`
+# turned an awk program's `h=$0` into `h=@docs/x-plan.md`. And awk is checked
+# harder than its neighbours - an unquoted glob in an awk command line is
+# refused outright, because it can expand into a program file or a flag before
+# awk runs. Both fail at invocation, on the user's machine, with no plan file
+# in the repo that could have caught it.
+snippets=$(grep -ho '!`[^`]*`' "$ROOT"/skills/*/SKILL.md)
+
+hits=$(printf '%s\n' "$snippets" | grep '\$[0-9]')
+ok "$(empty "$hits")" "no inline snippet uses \$0-\$9, which the harness replaces with the skill's arguments" "$hits"
+
+hits=$(printf '%s\n' "$snippets" | grep 'awk' | grep '[*]')
+ok "$(empty "$hits")" "no inline snippet passes an unquoted glob to awk" "$hits"
+
+# ---------------------------------------------------------------------------
 printf '\n%s passed, %s failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1
