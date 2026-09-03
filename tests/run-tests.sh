@@ -363,5 +363,21 @@ ok "$(empty "$out")" "the successor does not immediately re-fire the boundary" "
 teardown
 
 # ---------------------------------------------------------------------------
+echo "the manifest"
+# ---------------------------------------------------------------------------
+
+# The harness executes a hook command directly, so the exec bit is part of the
+# contract. Every test above invokes `sh script.sh`, which passes with or without
+# it - only this check sees the difference between a hook that runs and one that
+# fails with Permission denied.
+for rel in $(grep -o 'scripts/[A-Za-z0-9_.-]*' "$ROOT/hooks/hooks.json" | sort -u); do
+  ok "$([ -x "$ROOT/$rel" ] && echo yes || echo no)" "$rel is executable" "$(ls -l "$ROOT/$rel" 2>&1)"
+done
+
+# run-gated.sh is not a hook, but plans name it as their build command and run it
+# the same way.
+ok "$([ -x "$ROOT/scripts/run-gated.sh" ] && echo yes || echo no)" "scripts/run-gated.sh is executable"
+
+# ---------------------------------------------------------------------------
 printf '\n%s passed, %s failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1
