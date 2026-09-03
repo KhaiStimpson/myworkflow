@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "flow",
-  "version": "0.5.3",
-  "description": "Khai's working loop as a plugin — route the task, explore or design before code, write a phased plan with the loop prompt that executes it, work one slice at a time, look at the running app on desktop and mobile, then hand off.",
+  "version": "0.5.4",
+  "description": "Khai's working loop as a plugin \u2014 route the task, explore or design before code, write a phased plan with the loop prompt that executes it, work one slice at a time, look at the running app on desktop and mobile, then hand off.",
   "author": {
     "name": "Khai",
     "email": "khai@stimpson.dev"
@@ -30,7 +30,6 @@
     "./agents/researcher.md",
     "./agents/fresh-eyes.md"
   ],
-  "hooks": "./hooks/hooks.json",
   "dependencies": [
     {
       "name": "mattpocock-skills",
