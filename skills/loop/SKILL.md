@@ -21,7 +21,7 @@ to start that engine correctly — **not** to implement a task itself.
 - Handoff: !`ls HANDOFF-*.md 2>/dev/null || echo none`
 - Phase this session owns: !`cat .flow/phase 2>/dev/null || echo none`
 - Handoff pending: !`cat .flow/handoff-pending 2>/dev/null || echo none`
-- Phase of the next task: !`cat docs/*-plan.md 2>/dev/null | sed -n '/^## Phase/h; /^[[:space:]]*- \[ \]/{x;/./{p;q};q}' | grep . || echo none`
+- Phase of the next task: !`cat docs/*-plan.md 2>/dev/null | grep -e '^## Phase' -e '^[[:space:]]*- \[ \]' | grep -B999 -m1 -e '^[[:space:]]*- \[ \]' | grep '^## Phase' | tail -1 | grep . || echo none`
 
 Requested interval: **$ARGUMENTS** — empty means let the runner self-pace, which is what
 implementation work wants.

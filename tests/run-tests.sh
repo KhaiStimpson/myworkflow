@@ -386,18 +386,24 @@ echo "the skills' inline shell"
 # them, and two of those rewrites bite silently.
 #
 # $0..$9 are the slash command's own arguments: `/flow:loop @docs/x-plan.md`
-# turned an awk program's `h=$0` into `h=@docs/x-plan.md`. And awk is checked
-# harder than its neighbours - an unquoted glob in an awk command line is
-# refused outright, because it can expand into a program file or a flag before
-# awk runs. Both fail at invocation, on the user's machine, with no plan file
-# in the repo that could have caught it.
+# turned an awk program's `h=$0` into `h=@docs/x-plan.md`.
+#
+# And a snippet is only as runnable as its least-trusted command. awk and sed
+# both take a program on the command line, so both are permission-gated where
+# cat, ls, grep, head and tail are not - a snippet reaching for either stops
+# the skill before it starts, and asking the user to approve a context bullet
+# defeats the point of gathering it. Anything these five cannot express does
+# not belong inline; it belongs in scripts/, where the program is a file.
+#
+# Both faults land at invocation, on the user's machine, with no plan file in
+# this repo that could have caught them.
 snippets=$(grep -ho '!`[^`]*`' "$ROOT"/skills/*/SKILL.md)
 
 hits=$(printf '%s\n' "$snippets" | grep '\$[0-9]')
 ok "$(empty "$hits")" "no inline snippet uses \$0-\$9, which the harness replaces with the skill's arguments" "$hits"
 
-hits=$(printf '%s\n' "$snippets" | grep 'awk' | grep '[*]')
-ok "$(empty "$hits")" "no inline snippet passes an unquoted glob to awk" "$hits"
+hits=$(printf '%s\n' "$snippets" | grep -E '(^|[^a-z-])(awk|sed)[ (]')
+ok "$(empty "$hits")" "no inline snippet shells out to awk or sed, which need approval to run" "$hits"
 
 # ---------------------------------------------------------------------------
 printf '\n%s passed, %s failed\n' "$PASS" "$FAIL"
