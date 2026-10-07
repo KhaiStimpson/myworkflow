@@ -1,7 +1,7 @@
 ---
 name: eyes
 description: Run the app, look at it at desktop and mobile widths, and capture durable screenshots — the review pass that green tests do not perform. Use before committing any UI-touching change, and before asking for approval on visual work.
-model: sonnet
+model: haiku
 effort: medium
 paths: ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/*.razor", "**/*.cshtml", "**/*.xaml", "**/*.css", "**/*.scss", "**/*.html"]
 allowed-tools: Read, Glob, Grep, Bash(npx playwright *), Bash(*chrome-headless-shell*), Bash(mkdir *), Bash(npm run *), Bash(pnpm *), Bash(yarn *), Bash(dotnet run *)

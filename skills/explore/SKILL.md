@@ -14,7 +14,8 @@ Generic ideas are worthless here: ground every suggestion in something you actua
 parser, this view, this table. A suggestion that could have been written without opening the repo
 does not belong in the list.
 
-But do the reading **in a subagent**. Spawn the Agent tool with `subagent_type: Explore` and ask
+But do the reading **in a subagent**. Spawn the Agent tool with `subagent_type: Explore` and
+`model: haiku` — mapping a repo is search, not judgment — and ask
 for the map you need — the surfaces in play, what each does, where the seams are — and build on
 what it returns. Reading twenty files into this conversation to produce ten bullet points is the
 expensive way to get the same list.
@@ -52,9 +53,8 @@ Mocking the lead candidate rather than the whole list is what keeps this afforda
 that lose cost nothing to visualise, because they never were.
 
 - **Invoke `design` with the Skill tool.** Not a paraphrase of it, not your own three variants
-  written inline. It carries the extraction preflight, the both-breakpoints rule and the
-  recommendation-with-cost-line that make the variants worth looking at, and skipping it to save
-  a step is how a mockup ends up rendering components invisible.
+  written inline. It carries the both-breakpoints rule and the recommendation-with-cost-line
+  that make the variants worth looking at.
 - **Tell it this is an explore pass**, so it publishes into this artifact rather than its own:
   hand it the explore artifact's URL and say the variants are a section of that page, not a
   separate page. Design's stable-URL rule still holds — the stable URL is simply this one.
@@ -67,11 +67,6 @@ that lose cost nothing to visualise, because they never were.
 **One artifact, one URL.** The published page carries the options, the recommendation, and the
 variants for the recommended direction at desktop and mobile, in that order. A brainstorm that
 lands as two links has lost the thing it was for — one page, readable on a phone.
-
-The zero-files rule at the top of this skill still holds where it matters. Design's extraction
-preflight writes `docs/design/.extracted-<slug>.html`, and that is a scratch file the mockup is
-built from, not a change to the product — no source file is touched, and nothing here is
-implementation. Use the explore topic as the slug, since no effort slug exists yet.
 
 When the axis does not fire, say so in one line, the same way `start` does. A silent skip is
 indistinguishable from having forgotten.

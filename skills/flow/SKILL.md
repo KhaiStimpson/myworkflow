@@ -2,7 +2,7 @@
 name: flow
 description: Front door for any new piece of work — routes it, then runs the route end to end. Use when you want the whole working loop rather than one stage of it.
 argument-hint: [what you want to build or fix]
-model: sonnet
+model: haiku
 effort: low
 ---
 

@@ -53,7 +53,7 @@ Two you need to remember. Seven more underneath, for when you want to drive one 
 |---|---|
 | `/flow:start` | Investigates, announces a route in three lines, one-token veto. |
 | `/flow:explore` | Brainstorm with zero file changes → artifact of options with a recommendation, with design variants folded into the same page when the idea is visual. |
-| `/flow:design` | Three variants, desktop + mobile, one HTML artifact → a decisions record that outranks the mockup. |
+| `/flow:design` | Three plain variants, desktop + mobile, one HTML artifact → a decisions record that names the real components and outranks the mockup. |
 | `/flow:plan` | Phased checkbox plan in `docs/` **plus the loop prompt that executes it**. Implements nothing. |
 | `/flow:work` | One slice, one branch, verify, screenshot, land on the integration branch. |
 | `/flow:eyes` | Run it and look at it, both breakpoints — the pass green tests do not perform. |
@@ -66,6 +66,18 @@ Two agents run in the background: **`researcher`** (primary sources, inline cita
 skill here uses `context: fork`, and nothing spawns `subagent_type: fork`. A forked reviewer
 inherits the reasoning that wrote the code and agrees with it; a forked loop re-reads the whole
 transcript on every iteration to learn what the plan file already says.
+
+## Which model runs what
+
+Haiku takes the stages that are dispatch, template-filling or search; Sonnet keeps everything
+whose output is judged or built on.
+
+| Haiku | Sonnet |
+|---|---|
+| `/flow` (dispatch), `/flow:loop` (fills the template), `eyes` (launch and capture), every `Explore` pass | `start`, `explore`, `design`, `plan`, `work`, `wrap`, `researcher`, `fresh-eyes`, and the loop agent itself |
+
+The loop iterations stay on Sonnet: `/flow:loop` spawns its agent with `model: sonnet` explicitly,
+because a spawned agent otherwise inherits the Haiku it was started from.
 
 ## One phase, one session
 

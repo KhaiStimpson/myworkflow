@@ -2,7 +2,7 @@
 name: loop
 description: Start the loop that executes the live plan — read the plan, fill in the loop prompt from the template, and hand it to /loop. Use to run a planned effort to completion or to resume one, instead of pasting the loop prompt by hand.
 argument-hint: [optional interval, e.g. 10m]
-model: sonnet
+model: haiku
 effort: medium
 ---
 
@@ -93,6 +93,8 @@ Take this route when **either** is true:
 Either way, **spawn one background agent on fresh context** with the Agent tool:
 
 - `subagent_type: general-purpose`
+- `model: sonnet` — this skill runs on Haiku because filling a template is mechanical, but the
+  agent implements, and a spawned agent inherits its parent's model unless told otherwise
 - `run_in_background: true`
 - prompt: the filled-in loop prompt, plus the plan path and the handoff path, plus the successor
   variant from the template — work this phase only, hand off at its boundary.

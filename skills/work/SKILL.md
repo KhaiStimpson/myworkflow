@@ -46,7 +46,7 @@ reviewed.
    effort decided against, or skip one it decided for.
 3. **If this slice touches UI, run `eyes` before committing.** A green build is not done for
    anything a person can see. Hand it to a **fresh** subagent — the Agent tool with
-   `subagent_type: general-purpose`, `run_in_background: false`, and a prompt telling it to invoke
+   `subagent_type: general-purpose`, `model: haiku`, `run_in_background: false`, and a prompt telling it to invoke
    the `eyes` skill on this slice — so launching the app and capturing screenshots does not land
    in this context. Fresh, never forked: see the note at the bottom.
 

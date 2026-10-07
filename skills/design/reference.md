@@ -2,17 +2,15 @@
 
 Background for `design`. Not loaded unless something here is in question.
 
-## Why extraction beats reconstruction
+## Why there is no extraction step
 
-The failure mode in a brownfield mockup is not CSS, it is markup. Extracted CSS comes out exact;
-hand-rolled markup renders components invisible — white on transparent is the classic. So the
-extractor is told to **copy** real component markup rather than reconstruct it from class names,
-and "zero unresolved local references" is the success test, because an unresolved reference means
-the extractor misread the project rather than that the project is missing something.
-
-Whatever the application loads at document head **is** the design system, by definition. Not what
-a style guide says it is, not what a component library exports — what actually loads, in the
-order it loads.
+An earlier version had a subagent inline the app shell's stylesheets and copy real component
+markup into a scratch file, so mockups rendered in the real design system. It worked, and it was
+the most expensive thing the design pass did — tens of thousands of tokens of CSS per pass — for
+a fidelity that never decided anything. What gets judged on a mockup is layout, hierarchy and
+behaviour at two breakpoints; what binds implementation is the decision record, which already
+names the real components by file path. So the mockup is deliberately plain, and fidelity moved
+to the one place that is actually built from.
 
 ## Why three variants, at both breakpoints
 

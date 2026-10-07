@@ -8,25 +8,16 @@ effort: high
 More than one defensible visual answer exists, so the cheapest place to be wrong is a mockup.
 Nothing here is production code and nothing here gets copied into the app.
 
-## Preflight: extract the design system in a subagent
+## No design-system extraction
 
-**Do not read the app's stylesheets into this conversation.** Extracted CSS runs to tens of
-thousands of tokens and it stays in context for the rest of the session. Delegate it:
+**Do not extract, inline or read the app's stylesheets.** The mockup answers layout, hierarchy
+and behaviour — not exact tokens — and a faithful copy of the design system cost tens of
+thousands of tokens per pass for a fidelity nobody was judging. Style the variants with a small
+neutral palette of your own, declared once as CSS custom properties, and keep them visibly
+plain so nobody mistakes them for production styling.
 
-> Spawn the Agent tool with `subagent_type: Explore` and this task: find the app shell — whatever
-> the application loads at document head **is** the design system, by definition — and write
-> `docs/design/.extracted-<effort>.html`: a single self-contained file with the shell's
-> stylesheets inlined **in the shell's own load order**, local assets embedded, and the real
-> component markup copied verbatim for the components this effort touches. Report the file path,
-> the shell it found, and any unresolved local reference.
-
-Then read only that file. Success is: shell found, and **zero unresolved local references**. An
-unresolved reference means the extractor misread the project — fix that rather than shipping an
-approximate artifact. Where an external font cannot be fetched, declare it and **never invent a
-substitute**.
-
-**Greenfield, or no extractable CSS-file system.** Say so and why, in one line, then invent — and
-know that whatever is approved becomes the seed of the project's design system.
+Fidelity to the real system is the **decision record's** job, not the mockup's: it names the
+reused components by real file path, and implementation builds from those.
 
 ## The artifact
 
@@ -57,18 +48,16 @@ things change, and only these two:
   user approves a direction there and then, write it — under the effort slug if `plan` has
   produced one, and under the explore topic if it has not.
 
-The preflight is unchanged. Extraction still happens in a subagent, and "zero unresolved local
-references" is still the success test — a brainstorm is a worse place to ship an approximate
-artifact, not a better one, because it is the mockup that sells the idea.
-
 ## The decision record outranks the mockup
 
 When a direction is approved, write `docs/design/<effort>.md` **before any implementation**:
 hierarchy and what earns emphasis; spacing rhythm and its scale; components **reused** from the
-existing system, by name with real file paths; components genuinely **new**, and why nothing
+existing system, by name with real file paths — find them with one Agent call,
+`subagent_type: Explore`, `model: haiku`, asking for **paths and one-line purposes only, never
+file contents**; components genuinely **new**, and why nothing
 existing covered it; choices **rejected**, with reasons, so they are not quietly reintroduced.
 
 State this explicitly in the handoff: the HTML is reference material for proportion and
 behaviour, **not markup to copy**.
 
-Why extraction beats reconstruction, and why three variants: `reference.md`.
+Why there is no extraction, and why three variants: `reference.md`.
